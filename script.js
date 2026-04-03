@@ -103,8 +103,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
 });
 
-/* Contact Form Simulation */
-function submitForm() {
+/* Live Contact Form via Web3Forms AJAX */
+function submitForm(e) {
+    e.preventDefault();
+    const form = document.getElementById('contact-form');
+    const formData = new FormData(form);
+    
     const btn = document.getElementById('submit-btn');
     const msg = document.getElementById('success-msg');
     
@@ -113,9 +117,28 @@ function submitForm() {
     btn.style.opacity = 0.8;
     btn.disabled = true;
 
-    setTimeout(() => {
-        btn.style.display = 'none';
-        msg.style.display = 'block';
-        document.getElementById('contact-form').reset();
-    }, 1500);
+    fetch('https://api.web3forms.com/submit', {
+        method: 'POST',
+        headers: { 'Accept': 'application/json' },
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            btn.style.display = 'none';
+            msg.style.display = 'block';
+            form.reset();
+        } else {
+            console.error(data);
+            btn.innerHTML = originalText;
+            btn.style.opacity = 1;
+            btn.disabled = false;
+        }
+    })
+    .catch(error => {
+        console.error(error);
+        btn.innerHTML = originalText;
+        btn.style.opacity = 1;
+        btn.disabled = false;
+    });
 }

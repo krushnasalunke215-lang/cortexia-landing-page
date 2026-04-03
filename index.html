@@ -189,12 +189,14 @@
         <div class="form-container glass">
             <h2>Request Enterprise Access</h2>
             <p>Join the future of engagement automation.</p>
-            <form id="contact-form" onsubmit="event.preventDefault(); submitForm();">
+            <form id="contact-form" onsubmit="submitForm(event)">
+                <input type="hidden" name="access_key" value="8a578693-04df-4047-bbc5-68f56ccd17aa">
+                <input type="hidden" name="subject" value="New Demo Request for Cortexia">
                 <div class="input-group">
-                    <input type="text" id="name" placeholder="Full Name" required>
-                    <input type="email" id="email" placeholder="Work Email" required>
+                    <input type="text" name="name" id="name" placeholder="Full Name" required>
+                    <input type="email" name="email" id="email" placeholder="Work Email" required>
                 </div>
-                <input type="text" id="company" placeholder="Company Name" required>
+                <input type="text" name="company" id="company" placeholder="Company Name" required>
                 <button type="submit" class="btn btn-primary" id="submit-btn" style="width: 100%; margin-top: 20px;">
                     Send Request <i class="fas fa-paper-plane" style="margin-left: 8px;"></i>
                 </button>
