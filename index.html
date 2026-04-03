@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cortexia - AI Lead Management System</title>
+    <meta name="description" content="AI-powered automated follow-ups and lead management for modern businesses.">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="trust-banner">
+        <span><i class="fas fa-shield-alt"></i> SOC-2 Type II Certified Compliance</span>
+        <span class="hide-mobile"><i class="fas fa-server"></i> 99.99% Uptime SLA</span>
+        <span class="hide-mobile"><i class="fas fa-lock"></i> Bank-Grade AES-256 Encryption</span>
+    </div>
+
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    
+    <nav class="navbar glass">
+        <div class="nav-container">
+            <a href="index.html" class="logo">Cortexia<span class="dot">.</span></a>
+            <div class="nav-links">
+                <a href="index.html#features">Features</a>
+                <a href="index.html#how-it-works">How It Works</a>
+                <a href="about.html">About Us</a>
+                <a href="privacy-policy.html">Privacy</a>
+                <a href="#contact" class="btn btn-outline" onclick="document.getElementById('contact').scrollIntoView(); return false;">Book Demo</a>
+            </div>
+            <div class="mobile-menu-btn"><i class="fas fa-bars"></i></div>
+        </div>
+    </nav>
+
+    <header class="hero">
+        <div class="hero-content">
+            <div class="badge glow"><i class="fas fa-robot"></i> Cortexia AI Engine v4.0 Active</div>
+            <h1 class="animate-up">Never Miss a <br><span class="gradient-text dynamic-text">Lead</span> Again.</h1>
+            <p class="animate-up delay-1">Enterprise AI automated follow-ups, seamless routing, and predictive lead management for modern businesses.</p>
+            <div class="hero-actions animate-up delay-2">
+                <a href="#demo" class="btn btn-primary" onclick="document.getElementById('demo').scrollIntoView(); return false;">Start Free Trial</a>
+                <a href="#features" class="btn btn-text">Explore Capabilities &rarr;</a>
+            </div>
+        </div>
+        
+        <div class="hero-visual animate-fade-in delay-3" id="demo">
+            <div class="dashboard-mockup glass interactive">
+                <div class="mockup-header">
+                    <div class="traffic-lights">
+                        <span class="mockup-dot red"></span><span class="mockup-dot yellow"></span><span class="mockup-dot green"></span>
+                    </div>
+                    <div class="mockup-status"><i class="fas fa-wifi text-green"></i> Real-time Sync</div>
+                </div>
+                <div class="mockup-body">
+                    <div class="mockup-tabs">
+                        <div class="m-tab active" data-tab="1">Overview</div>
+                        <div class="m-tab" data-tab="2">Analytics</div>
+                        <div class="m-tab" data-tab="3">Automation Map</div>
+                    </div>
+                    <div class="mockup-tab-content">
+                        <!-- Simulated Interactive Dashboard -->
+                        <div class="mockup-stat-row">
+                            <div class="mockup-stat counter">
+                                <div class="stat-label">Engagement Rate</div>
+                                <div class="stat-value" data-target="98.4">0.0%</div>
+                            </div>
+                            <div class="mockup-stat">
+                                <div class="stat-label">Action Status</div>
+                                <div class="stat-value text-green"><i class="fas fa-check-circle"></i> Active</div>
+                            </div>
+                            <div class="mockup-stat counter">
+                                <div class="stat-label">Leads Recovered</div>
+                                <div class="stat-value text-blue" data-target="412">0</div>
+                            </div>
+                        </div>
+                        <div class="mockup-chart" id="interactive-chart">
+                            <div class="bar" style="height: 40%"></div>
+                            <div class="bar" style="height: 60%"></div>
+                            <div class="bar" style="height: 85%"></div>
+                            <div class="bar" style="height: 70%"></div>
+                            <div class="bar" style="height: 100%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <section id="features" class="features">
+        <div class="section-title">
+            <h2>Intelligent Operations</h2>
+            <p>Designed for scale, engineered for conversion, built for Meta safety.</p>
+        </div>
+        <div class="features-grid">
+            <div class="feature-card glass">
+                <div class="feature-icon"><i class="fas fa-phone-volume"></i></div>
+                <h3>Voice Lead Recovery</h3>
+                <p>Automatically detect missed calls and initiate AI-driven conversational follow-ups before leads go cold.</p>
+            </div>
+            <div class="feature-card glass">
+                <div class="feature-icon"><i class="fas fa-brain"></i></div>
+                <h3>Smart Lead Scoring</h3>
+                <p>AI categorizes and scores leads based on engagement, filtering high-intent prospects instantly.</p>
+            </div>
+            <div class="feature-card glass">
+                <div class="feature-icon"><i class="fas fa-plug"></i></div>
+                <h3>Omnichannel Sync</h3>
+                <p>Connects with WhatsApp, SMS, and your CRM in real-time. No code required.</p>
+            </div>
+            <div class="feature-card glass">
+                <div class="feature-icon"><i class="fas fa-chart-line"></i></div>
+                <h3>Predictive Analytics</h3>
+                <p>Visualize conversion bottlenecks and optimize your engagement funnels automatically.</p>
+            </div>
+            <div class="feature-card glass">
+                <div class="feature-icon"><i class="fas fa-shield-alt"></i></div>
+                <h3>Privacy First</h3>
+                <p>Fully compliant with regional data protection standards with automated data anonymization.</p>
+            </div>
+            <div class="feature-card glass">
+                <div class="feature-icon"><i class="fas fa-cogs"></i></div>
+                <h3>Workflow Automation</h3>
+                <p>Set triggers to automate appointment bookings, follow-ups, and calendar syncing seamlessly.</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="how-it-works" class="timeline-section">
+        <div class="section-title">
+            <h2>How Cortexia Automates Growth</h2>
+            <p>From initial contact to finalized retention.</p>
+        </div>
+        <div class="timeline">
+            <div class="timeline-item glass">
+                <div class="timeline-dot">1</div>
+                <h3>Capture</h3>
+                <p>Cortexia's Engine intercepts missed interactions across voice, web, and chat platforms securely.</p>
+            </div>
+            <div class="timeline-item glass">
+                <div class="timeline-dot">2</div>
+                <h3>Engage</h3>
+                <p>Automated logic immediately reaches out using personalized, human-like messaging on preferred channels.</p>
+            </div>
+            <div class="timeline-item glass">
+                <div class="timeline-dot">3</div>
+                <h3>Categorize</h3>
+                <p>Lead intent is scored using NLP, creating an organized queue for your human sales teams to finalize.</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="faq" class="faq-section">
+        <div class="section-title">
+            <h2>Frequently Asked Questions</h2>
+        </div>
+        <div class="faq-accordion glass">
+            <div class="faq-item">
+                <div class="faq-question">
+                    <h4>Is Cortexia compliant with data privacy laws?</h4>
+                    <i class="fas fa-plus"></i>
+                </div>
+                <div class="faq-answer">
+                    <p>Yes. Cortexia is a product of LEAD RECOVERY, maintaining strict privacy protocols, encryption standards, and adherence to business regulations including ISO 27001 guidelines.</p>
+                </div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">
+                    <h4>How does the AI Lead Recovery work?</h4>
+                    <i class="fas fa-plus"></i>
+                </div>
+                <div class="faq-answer">
+                    <p>Our intelligent system detects when a customer engagement is missed (like a dropped call) and instantly executes a pre-built automation workflow to re-engage them via chat or SMS.</p>
+                </div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">
+                    <h4>Does it integrate with my existing tools?</h4>
+                    <i class="fas fa-plus"></i>
+                </div>
+                <div class="faq-answer">
+                    <p>Absolutely. We feature seamless APIs and webhook capabilities to integrate with 90% of popular CRM platforms and marketing stacks instantly.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="contact" class="interactive-form-section">
+        <div class="form-container glass">
+            <h2>Request Enterprise Access</h2>
+            <p>Join the future of engagement automation.</p>
+            <form id="contact-form" onsubmit="event.preventDefault(); submitForm();">
+                <div class="input-group">
+                    <input type="text" id="name" placeholder="Full Name" required>
+                    <input type="email" id="email" placeholder="Work Email" required>
+                </div>
+                <input type="text" id="company" placeholder="Company Name" required>
+                <button type="submit" class="btn btn-primary" id="submit-btn" style="width: 100%; margin-top: 20px;">
+                    Send Request <i class="fas fa-paper-plane" style="margin-left: 8px;"></i>
+                </button>
+                <div class="success-message" id="success-msg" style="display: none; color: var(--primary); margin-top: 15px; text-align: center;">
+                    <i class="fas fa-check-circle"></i> Request received. A Cortexia representative will contact you shortly.
+                </div>
+            </form>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="footer-links">
+            <a href="about.html">About Cortexia</a> •
+            <a href="privacy-policy.html">Privacy Policy</a> •
+            <a href="#">Terms of Service</a>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 Cortexia Labs. All rights reserved.</p>
+            <p>Cortexia is a technology brand operated by <strong>LEAD RECOVERY</strong>.</p>
+            <p>Registered Address: <span>[Insert your Udyam Certificate Address here]</span></p>
+            <p>Contact: <a href="mailto:admin@cortexia.shop">admin@cortexia.shop</a></p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
