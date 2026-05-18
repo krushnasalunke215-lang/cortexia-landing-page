@@ -166,7 +166,7 @@ async function loadBusinessModules() {
     var config = TAB_CONFIG[businessFlowType] || TAB_CONFIG.ai;
 
     // Show/hide tabs based on config
-    var tabIds = ['leads', 'chats', 'bookings', 'notifications', 'vehicles', 'patients', 'profile'];
+    var tabIds = ['leads', 'chats', 'bookings', 'notifications', 'vehicles', 'patients', 'profile', 'insights'];
     for (var i = 0; i < tabIds.length; i++) {
       var tabBtn = $('#tab-' + tabIds[i]);
       var tabView = $('#view-' + tabIds[i]);
@@ -277,7 +277,212 @@ function closePage(name) {
   if (!screen) return;
   screen.classList.remove('open');
   screen.classList.add('closing');
-  setTimeout(() => { screen.classList.remove('closing'); screen.style.display = 'none'; }, 250);
+  setTimeout(() => { screen.style.display = 'none'; screen.classList.remove('closing'); }, 250);
+}
+
+async function loadAnalyticsPage() {
+  const body = $('#analytics-body');
+  if (!body) return;
+  body.innerHTML = '<div class="loading-center"><div class="spinner"></div><span>Loading analytics...</span></div>';
+  
+  try {
+    const data = await api('/api/businesses/' + BID + '/analytics');
+    
+    let html = `
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;margin-top:8px">
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:20px 16px;text-align:center">
+          <div style="font-size:28px;font-weight:700;color:var(--primary)">${data.totalLeads || 0}</div>
+          <div style="font-size:12px;color:var(--text-muted);margin-top:6px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px">Total Patients</div>
+        </div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:20px 16px;text-align:center">
+          <div style="font-size:28px;font-weight:700;color:#10b981">${data.qualifiedLeads || 0}</div>
+          <div style="font-size:12px;color:var(--text-muted);margin-top:6px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px">Completed Appts</div>
+        </div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:20px 16px;text-align:center;grid-column:1/-1">
+          <div style="font-size:28px;font-weight:700;color:var(--text)">${data.aiMessageCount || 0}</div>
+          <div style="font-size:12px;color:var(--text-muted);margin-top:6px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px">AI Messages Handled</div>
+        </div>
+      </div>
+      
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:20px;margin-bottom:12px">
+        <div style="font-size:15px;font-weight:700;color:var(--primary-light);margin-bottom:10px;display:flex;align-items:center;gap:8px">
+            <i class="fas fa-file-excel"></i> Data Export
+        </div>
+        <p style="font-size:13px;color:var(--text-muted);margin-bottom:20px;line-height:1.5">Download a complete Excel-compatible CSV list of all your patients, including their clinical details, height, weight, and history.</p>
+        <button class="btn-primary" style="width:100%;padding:14px;border-radius:12px;font-size:14px;display:flex;align-items:center;justify-content:center;gap:8px" onclick="exportPatientsCSV()">
+            <i class="fas fa-download"></i> Export Patients Data
+        </button>
+      </div>
+    `;
+    
+    body.innerHTML = html;
+  } catch (e) {
+    body.innerHTML = '<div class="empty"><i class="fas fa-exclamation-triangle"></i><p>Failed to load analytics</p></div>';
+  }
+}
+
+function exportPatientsCSV() {
+  const token = localStorage.getItem('token');
+  fetch('/api/businesses/' + BID + '/export/patients', {
+    headers: { 'Authorization': 'Bearer ' + token }
+  })
+  .then(res => res.blob())
+  .then(blob => {
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'patient_records.csv';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    window.URL.revokeObjectURL(url);
+    showToast('Export downloaded successfully!');
+  })
+  .catch(err => alert('Export failed: ' + err.message));
+}
+
+/* ── Premium Doctor Insights Dashboard ────── */
+let insightsChart1 = null;
+let insightsChart2 = null;
+
+async function loadInsights() {
+  const container = $('#insights-content');
+  if (!container) return;
+  
+  container.innerHTML = '<div class="loading-center" style="color:#fff"><div class="spinner"></div><span>Loading Insights...</span></div>';
+  
+  try {
+    const data = await api('/api/businesses/' + BID + '/doctor-analytics');
+    
+    // Determine trend arrow
+    const trendIcon = data.trend >= 0 ? '<i class="fas fa-arrow-up" style="color:#10b981"></i>' : '<i class="fas fa-arrow-down" style="color:#ef4444"></i>';
+    const trendColor = data.trend >= 0 ? '#10b981' : '#ef4444';
+
+    let html = `
+      <!-- AI Practice Summary -->
+      <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:16px;padding:16px;margin-bottom:20px;backdrop-filter:blur(10px)">
+        <div style="display:flex;gap:12px;align-items:flex-start">
+          <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg, #06b6d4, #3b82f6);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0"><i class="fas fa-robot"></i></div>
+          <div>
+            <h4 style="margin:0;font-size:14px;color:#fff;margin-bottom:4px">Practice Health Insight</h4>
+            <p style="margin:0;font-size:12px;color:#94a3b8;line-height:1.5">Good morning, Dr. Salunke. Your clinic grew by ${Math.abs(data.trend)}% this month. The AI handled ${data.aiMessageCount} routine messages and intercepted ${data.alertsIntercepted} abnormal vitals, saving you approximately ${data.hoursSaved} hours of admin time.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Hero KPIs -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px">
+        <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:20px 16px;position:relative;overflow:hidden">
+          <div style="font-size:11px;color:#94a3b8;font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Total Patients</div>
+          <div style="font-size:32px;font-weight:700;color:#fff;display:flex;align-items:baseline;gap:8px">
+            ${data.totalPatients} <span style="font-size:12px;color:${trendColor};font-weight:600">${trendIcon} ${Math.abs(data.trend)}%</span>
+          </div>
+        </div>
+        <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:20px 16px;">
+          <div style="font-size:11px;color:#94a3b8;font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Time Saved</div>
+          <div style="font-size:32px;font-weight:700;color:#06b6d4;">${data.hoursSaved}<span style="font-size:14px;color:#94a3b8;margin-left:4px">hrs</span></div>
+        </div>
+        <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:20px 16px;grid-column:1/-1;display:flex;align-items:center;justify-content:space-between">
+          <div>
+            <div style="font-size:11px;color:#94a3b8;font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Critical Alerts Intercepted</div>
+            <div style="font-size:28px;font-weight:700;color:#ef4444">${data.alertsIntercepted}</div>
+          </div>
+          <div style="width:48px;height:48px;border-radius:12px;background:rgba(239,68,68,0.1);color:#ef4444;display:flex;align-items:center;justify-content:center;font-size:20px"><i class="fas fa-heartbeat"></i></div>
+        </div>
+      </div>
+
+      <!-- Charts -->
+      <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:20px;margin-bottom:20px">
+        <h3 style="font-size:14px;color:#fff;margin:0 0 16px 0;font-weight:600">Patient Demographics (Comorbidities)</h3>
+        <div style="position:relative;height:200px;width:100%">
+          <canvas id="chart-comorb"></canvas>
+        </div>
+      </div>
+
+      <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:20px;margin-bottom:20px">
+        <h3 style="font-size:14px;color:#fff;margin:0 0 16px 0;font-weight:600">Consultation Volume (Last 7 Days)</h3>
+        <div style="position:relative;height:180px;width:100%">
+          <canvas id="chart-heatmap"></canvas>
+        </div>
+      </div>
+
+      <!-- Premium Export Suite -->
+      <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:16px;padding:20px;margin-bottom:40px">
+        <h3 style="font-size:14px;color:#fff;margin:0 0 12px 0;font-weight:600"><i class="fas fa-cloud-download-alt" style="margin-right:8px;color:#06b6d4"></i> Export Suite</h3>
+        <p style="font-size:12px;color:#94a3b8;line-height:1.5;margin-bottom:16px">Download your complete encrypted clinical ledger for offline review and compliance.</p>
+        <button onclick="exportPatientsCSV()" style="width:100%;padding:14px;border-radius:12px;background:linear-gradient(135deg, #10b981, #059669);color:#fff;border:none;font-weight:600;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 4px 14px rgba(16,185,129,0.3)">
+          <i class="fas fa-file-csv"></i> Download Clinical Ledger
+        </button>
+      </div>
+    `;
+    
+    container.innerHTML = html;
+
+    // Render Charts
+    if (insightsChart1) insightsChart1.destroy();
+    if (insightsChart2) insightsChart2.destroy();
+
+    const ctx1 = document.getElementById('chart-comorb').getContext('2d');
+    insightsChart1 = new Chart(ctx1, {
+      type: 'doughnut',
+      data: {
+        labels: Object.keys(data.comorbidities),
+        datasets: [{
+          data: Object.values(data.comorbidities),
+          backgroundColor: ['#ef4444', '#f59e0b', '#10b981', '#3b82f6'],
+          borderWidth: 0,
+          hoverOffset: 4
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: '75%',
+        plugins: {
+          legend: { position: 'right', labels: { color: '#94a3b8', font: { size: 11, family: 'Outfit' }, boxWidth: 12 } }
+        }
+      }
+    });
+
+    const ctx2 = document.getElementById('chart-heatmap').getContext('2d');
+    
+    // Create gradient
+    let gradient = ctx2.createLinearGradient(0, 0, 0, 180);
+    gradient.addColorStop(0, 'rgba(6, 182, 212, 0.4)');
+    gradient.addColorStop(1, 'rgba(6, 182, 212, 0.0)');
+
+    insightsChart2 = new Chart(ctx2, {
+      type: 'line',
+      data: {
+        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+        datasets: [{
+          label: 'Consultations',
+          data: data.heatmap,
+          borderColor: '#06b6d4',
+          backgroundColor: gradient,
+          borderWidth: 3,
+          tension: 0.4, // smooth spline
+          fill: true,
+          pointBackgroundColor: '#0B1120',
+          pointBorderColor: '#06b6d4',
+          pointBorderWidth: 2,
+          pointRadius: 4
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { grid: { display: false, drawBorder: false }, ticks: { color: '#64748b', font: { family: 'Outfit' } } },
+          y: { grid: { color: 'rgba(255,255,255,0.05)', drawBorder: false }, ticks: { display: false } }
+        }
+      }
+    });
+
+  } catch (e) {
+    container.innerHTML = '<div class="empty" style="color:#ef4444"><i class="fas fa-exclamation-triangle"></i><p>Failed to load insights</p></div>';
+  }
 }
 
 /* ── Full Analytics Dashboard ─────────────── */
@@ -420,6 +625,7 @@ function loadTab(tab) {
   else if (tab === 'patients') loadPatients();
   else if (tab === 'notifications') loadNotifications();
   else if (tab === 'profile') loadProfile();
+  else if (tab === 'insights') loadInsights();
 }
 
 function updateBadge() {
@@ -1874,10 +2080,14 @@ function applyRoleVisibility() {
       if (st) st.style.display = '';
     }
   }
-  // Doctor: hide vehicles, show patients
-  if (userRole === 'doctor') {
+  // Doctor: hide vehicles, show patients and insights
+  if (userRole === 'doctor' || businessFlowType === 'doctor') {
     var vt = $('#tab-vehicles');
     if (vt) vt.style.display = 'none';
+    var pt = $('#tab-patients');
+    if (pt) pt.style.display = '';
+    var inTab = $('#tab-insights');
+    if (inTab) inTab.style.display = '';
   }
 }
 

@@ -15,6 +15,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
   <link rel="stylesheet" href="/mobile.css?v=16">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 
@@ -224,6 +225,19 @@
     <div class="card-list" id="patients-list"></div>
   </div>
 
+  <div class="view" id="view-insights" style="background:#0B1120;color:#f8fafc;">
+    <div class="topbar" style="background:#0B1120;border-bottom:1px solid rgba(255,255,255,0.1)">
+      <button class="hamburger" onclick="openSidebar()"><i class="fas fa-bars" style="color:#fff"></i></button>
+      <div class="topbar-title">
+        <h2 style="color:#fff">Clinical Insights</h2>
+        <div class="topbar-sub" style="color:#94a3b8">Premium Practice Analytics</div>
+      </div>
+    </div>
+    <div class="view-content" id="insights-content" style="padding:16px;">
+      <!-- Chart.js and KPIs will render here -->
+    </div>
+  </div>
+
   <!-- BOTTOM NAV -->
   <nav class="bottom-nav">
     <button class="nav-tab active" id="tab-leads" onclick="switchTab('leads')">
@@ -238,6 +252,7 @@
     </button>
     <button class="nav-tab" id="tab-vehicles" onclick="switchTab('vehicles')" style="display:none"><i class="fas fa-bus"></i><span>Fleet</span></button>
     <button class="nav-tab" id="tab-patients" onclick="switchTab('patients')" style="display:none"><i class="fas fa-stethoscope"></i><span>Patients</span></button>
+    <button class="nav-tab" id="tab-insights" onclick="switchTab('insights')" style="display:none"><i class="fas fa-chart-pie"></i><span>Insights</span></button>
     <button class="nav-tab" id="tab-profile" onclick="switchTab('profile')"><i class="fas fa-user"></i><span>Profile</span></button>
   </nav>
 </div>
