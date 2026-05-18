@@ -1225,8 +1225,21 @@ async function openPatientDetail(leadId) {
       else if (bmi < 30) { bmiLabel = bmi + ' Overweight'; bmiClass = 'bmi-over'; }
       else { bmiLabel = bmi + ' Obese'; bmiClass = 'bmi-obese'; }
     }
+    
+    // Parse Age/Gender
+    var ageVal = '—';
+    var genderVal = '—';
+    if (d.age_gender) {
+        var parts = String(d.age_gender).split(/[,/ -]+/);
+        var nums = parts.filter(p => /^\d+$/.test(p.trim()));
+        var words = parts.filter(p => /^[a-zA-Z]+$/.test(p.trim()) && !p.toLowerCase().includes('yr') && !p.toLowerCase().includes('year'));
+        if (nums.length) ageVal = nums[0] + ' yrs';
+        if (words.length) genderVal = words[0].charAt(0).toUpperCase() + words[0].slice(1).toLowerCase();
+    }
+
     var vitals = [
-      { icon: 'fa-birthday-cake', label: 'Age', val: d.age_gender || '—' },
+      { icon: 'fa-birthday-cake', label: 'Age', val: ageVal },
+      { icon: 'fa-venus-mars', label: 'Gender', val: genderVal },
       { icon: 'fa-ruler-vertical', label: 'Height', val: d.height ? d.height + (String(d.height).includes('cm') ? '' : ' cm') : '—' },
       { icon: 'fa-weight', label: 'Weight', val: d.weight ? d.weight + (String(d.weight).includes('kg') ? '' : ' kg') : '—' },
       { icon: 'fa-calculator', label: 'BMI', val: bmiLabel, cls: bmiClass },
@@ -1320,11 +1333,23 @@ async function openPatientDetail(leadId) {
         var rIcon = r.record_type === 'report' ? 'fa-file-pdf' : r.record_type === 'vitals' ? 'fa-heartbeat' : 'fa-image';
         var rLabel = r.record_type === 'report' ? 'Report' : r.record_type === 'vitals' ? 'Vitals' : (r.record_type || 'File');
         var rVal = rData.reading || rData.caption || rLabel;
-        html += '<div class="patient-record-row">'
-          + '<i class="fas ' + rIcon + '"></i>'
-          + '<span class="patient-record-text">' + esc(String(rVal).substring(0, 80)) + '</span>'
-          + '<span class="patient-record-time">' + fmtTime(r.created_at) + '</span>'
+        var rLink = rData.url || rData.media_url || '';
+        
+        // Hide raw URLs from the text
+        if (rVal.startsWith('http')) rVal = 'Attached ' + rLabel;
+
+        html += '<div class="patient-record-row" style="display:flex;align-items:center;padding:12px 0;border-bottom:1px solid var(--surface2)">'
+          + '<div style="width:36px;height:36px;border-radius:10px;background:rgba(99,102,241,.1);color:var(--primary);display:flex;align-items:center;justify-content:center;margin-right:12px;flex-shrink:0"><i class="fas ' + rIcon + '"></i></div>'
+          + '<div style="flex:1;min-width:0">'
+          + '<div class="patient-record-text" style="font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:4px">' + esc(rVal) + '</div>'
+          + '<div class="patient-record-time" style="font-size:11px;color:var(--text-muted)">' + fmtDate(r.created_at) + ' · ' + fmtTime(r.created_at) + '</div>'
           + '</div>';
+        
+        if (rLink) {
+            html += '<a href="' + esc(rLink) + '" target="_blank" style="padding:6px 12px;background:var(--primary);color:#fff;border-radius:8px;font-size:12px;font-weight:600;text-decoration:none;margin-left:8px;flex-shrink:0"><i class="fas fa-download" style="margin-right:4px"></i>View</a>';
+        }
+        
+        html += '</div>';
       }
       html += '</div>';
     }

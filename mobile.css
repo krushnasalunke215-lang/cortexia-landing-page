@@ -431,10 +431,10 @@ textarea.modal-input{resize:vertical;min-height:44px}
 .team-remove:active{background:rgba(239,68,68,.1)}
 
 /* ── Patient Profile Page ────────────────── */
-.pp-vitals-banner{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:12px 0;padding:0}
-.pp-vital-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 8px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:4px}
+.pp-vitals-banner{display:grid;grid-template-columns:repeat(auto-fit, minmax(65px, 1fr));gap:8px;margin:12px 0;padding:0}
+.pp-vital-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 4px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:4px}
 .pp-vital-item i{font-size:18px;color:var(--primary-light);margin-bottom:2px}
-.pp-vital-val{font-size:14px;font-weight:700;color:var(--text);line-height:1.2;word-break:break-word}
+.pp-vital-val{font-size:13px;font-weight:700;color:var(--text);line-height:1.2;word-break:break-word}
 .pp-vital-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted)}
 .bmi-normal{color:#059669}
 .bmi-under{color:#3B82F6}
@@ -467,8 +467,8 @@ textarea.modal-input{resize:vertical;min-height:44px}
 .pp-appt-status.confirmed{background:rgba(59,130,246,.15);color:#3B82F6}
 .pp-appt-status.cancelled{background:rgba(239,68,68,.15);color:#EF4444}
 .pp-appt-status.pending{background:rgba(245,158,11,.15);color:#D97706}
-.pp-appt-meta{font-size:12px;color:var(--text-muted);display:flex;align-items:center;gap:5px;margin-bottom:2px}
-.pp-appt-meta i{font-size:11px}
+.pp-appt-meta{font-size:12px;font-weight:600;color:var(--text);background:var(--surface2);padding:6px 12px;border-radius:20px;display:inline-flex;align-items:center;gap:6px;margin-bottom:6px;margin-top:2px}
+.pp-appt-meta i{font-size:11px;color:var(--text-muted)}
 .pp-appt-ts{font-size:11px;color:var(--text-muted);display:flex;align-items:center;gap:5px;margin-top:2px}
 .pp-appt-ts i{font-size:11px}
 .pp-appt-notes{font-size:12px;color:var(--text-muted);margin-top:4px;padding:6px 10px;background:var(--surface2);border-radius:8px;display:flex;align-items:flex-start;gap:6px}
