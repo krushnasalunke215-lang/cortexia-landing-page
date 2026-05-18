@@ -1135,7 +1135,17 @@ function renderPatientsList(container, patients) {
   for (var i = 0; i < patients.length; i++) {
     var p = patients[i];
     var name = p.patient_name || p.phone || 'Unknown';
-    var age = p.age_gender || '';
+    var ageStr = p.age_gender || '';
+    if (ageStr) {
+        var parts = String(ageStr).split(/[,/ -]+/);
+        var nums = parts.filter(pt => /^\d+$/.test(pt.trim()));
+        var words = parts.filter(pt => /^[a-zA-Z]+$/.test(pt.trim()) && !pt.toLowerCase().includes('yr') && pt.toLowerCase() !== 'and');
+        var cleanAge = nums.length ? nums[0] + ' yrs' : '';
+        var cleanGender = words.length ? words[0].charAt(0).toUpperCase() + words[0].slice(1).toLowerCase() : '';
+        age = [cleanAge, cleanGender].filter(Boolean).join(', ') || ageStr;
+    } else {
+        age = '';
+    }
     var complaint = p.chief_complaint || 'No complaint recorded';
     var phone = p.phone || '';
     var statusClass = p.status === 'COMPLETED' ? 'completed' : (p.status === 'IN_PROGRESS' ? 'progress' : 'new');
