@@ -8,14 +8,14 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
+    <script>
+        // Subdomain routing: if user visits app.cortexia.shop directly, take them to the dashboard.
+        if (window.location.hostname === 'app.cortexia.shop' && (window.location.pathname === '/' || window.location.pathname === '/index.html')) {
+            window.location.replace('/app.html');
+        }
+    </script>
 </head>
 <body>
-    <div class="trust-banner">
-        <span><i class="fas fa-shield-alt"></i> SOC-2 Type II Certified Compliance</span>
-        <span class="hide-mobile"><i class="fas fa-server"></i> 99.99% Uptime SLA</span>
-        <span class="hide-mobile"><i class="fas fa-lock"></i> Bank-Grade AES-256 Encryption</span>
-    </div>
-
     <div class="blob blob-1"></div>
     <div class="blob blob-2"></div>
     
@@ -27,7 +27,8 @@
                 <a href="index.html#how-it-works">How It Works</a>
                 <a href="about.html">About Us</a>
                 <a href="privacy-policy.html">Privacy</a>
-                <a href="#contact" class="btn btn-outline" onclick="document.getElementById('contact').scrollIntoView(); return false;">Book Demo</a>
+                <a href="app.html" class="btn btn-outline" style="border-color: var(--secondary); color: var(--secondary); box-shadow: 0 0 15px rgba(129, 140, 248, 0.2);">Client Login</a>
+                <a href="#contact" class="btn btn-primary" onclick="document.getElementById('contact').scrollIntoView(); return false;">Book Demo</a>
             </div>
             <div class="mobile-menu-btn"><i class="fas fa-bars"></i></div>
         </div>
@@ -35,13 +36,15 @@
 
     <header class="hero">
         <div class="hero-content">
-            <div class="badge glow"><i class="fas fa-robot"></i> Cortexia AI Engine v4.0 Active</div>
-            <h1 class="animate-up">Never Miss a <br><span class="gradient-text dynamic-text">Lead</span> Again.</h1>
-            <p class="animate-up delay-1">Enterprise AI automated follow-ups, seamless routing, and predictive lead management for modern businesses.</p>
+            <div class="badge glow"><i class="fas fa-chart-line"></i> Turn Lost Calls Into Paying Customers</div>
+            <h1 class="animate-up">Never Miss Another <br><span class="gradient-text dynamic-text">Customer</span> Again.</h1>
+            <p class="animate-up delay-1">When you miss a call, 80% of leads just call your competitor. Cortexia's AI instantly texts them on WhatsApp to answer questions and book the appointment before they leave.</p>
             <div class="hero-actions animate-up delay-2">
-                <a href="#demo" class="btn btn-primary" onclick="document.getElementById('demo').scrollIntoView(); return false;">Start Free Trial</a>
-                <a href="#features" class="btn btn-text">Explore Capabilities &rarr;</a>
+                <a href="#contact" class="btn btn-primary" onclick="document.getElementById('contact').scrollIntoView(); return false;">Book Demo</a>
+                <a href="#contact" class="btn btn-outline" onclick="document.getElementById('contact').scrollIntoView(); return false;">Contact Sales</a>
             </div>
+            
+
         </div>
         
         <div class="hero-visual animate-fade-in delay-3" id="demo">
@@ -50,104 +53,118 @@
                     <div class="traffic-lights">
                         <span class="mockup-dot red"></span><span class="mockup-dot yellow"></span><span class="mockup-dot green"></span>
                     </div>
-                    <div class="mockup-status"><i class="fas fa-wifi text-green"></i> Real-time Sync</div>
+                    <div class="mockup-status"><i class="fas fa-bolt text-green"></i> Live AI Chat Preview</div>
                 </div>
-                <div class="mockup-body">
-                    <div class="mockup-tabs">
-                        <div class="m-tab active" data-tab="1">Overview</div>
-                        <div class="m-tab" data-tab="2">Analytics</div>
-                        <div class="m-tab" data-tab="3">Automation Map</div>
-                    </div>
-                    <div class="mockup-tab-content">
-                        <!-- Simulated Interactive Dashboard -->
-                        <div class="mockup-stat-row">
-                            <div class="mockup-stat counter">
-                                <div class="stat-label">Engagement Rate</div>
-                                <div class="stat-value" data-target="98.4">0.0%</div>
-                            </div>
-                            <div class="mockup-stat">
-                                <div class="stat-label">Action Status</div>
-                                <div class="stat-value text-green"><i class="fas fa-check-circle"></i> Active</div>
-                            </div>
-                            <div class="mockup-stat counter">
-                                <div class="stat-label">Leads Recovered</div>
-                                <div class="stat-value text-blue" data-target="412">0</div>
-                            </div>
+                <div class="mockup-body" style="padding: 20px;">
+                    <!-- Simulated WhatsApp Chat -->
+                    <div style="display: flex; flex-direction: column; gap: 15px;">
+                        <div style="align-self: center; font-size: 0.7rem; color: #94A3B8; background: rgba(255,255,255,0.05); padding: 4px 12px; border-radius: 10px;">Missed call from +91 98765 43210 (11:42 AM)</div>
+                        
+                        <div style="align-self: flex-start; max-width: 80%; background: linear-gradient(135deg, var(--secondary), var(--primary)); color: #fff; padding: 12px 16px; border-radius: 16px 16px 16px 4px; font-size: 0.9rem; box-shadow: 0 4px 15px rgba(34, 211, 238, 0.2);">
+                            Hi there! This is Cortexia AI from <strong>Your Business</strong>. We just missed your call. How can I help you today?
                         </div>
-                        <div class="mockup-chart" id="interactive-chart">
-                            <div class="bar" style="height: 40%"></div>
-                            <div class="bar" style="height: 60%"></div>
-                            <div class="bar" style="height: 85%"></div>
-                            <div class="bar" style="height: 70%"></div>
-                            <div class="bar" style="height: 100%"></div>
+                        
+                        <div style="align-self: flex-end; max-width: 80%; background: rgba(255,255,255,0.1); color: #fff; padding: 12px 16px; border-radius: 16px 16px 4px 16px; font-size: 0.9rem; border: 1px solid rgba(255,255,255,0.1);">
+                            Hi! I need to book a consultation for tomorrow. What are your charges?
                         </div>
+                        
+                        <div style="align-self: flex-start; max-width: 80%; background: linear-gradient(135deg, var(--secondary), var(--primary)); color: #fff; padding: 12px 16px; border-radius: 16px 16px 16px 4px; font-size: 0.9rem; box-shadow: 0 4px 15px rgba(34, 211, 238, 0.2);">
+                            Our standard consultation fee is ₹1,500. We have slots available at 10:00 AM and 2:00 PM tomorrow. Shall I book one for you?
+                        </div>
+                        
+                        <div style="align-self: center; font-size: 0.7rem; color: #10B981; background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.3); padding: 4px 12px; border-radius: 10px;"><i class="fas fa-check-circle"></i> AI Automatically Qualified Lead & Synced to Dashboard</div>
                     </div>
                 </div>
             </div>
         </div>
     </header>
 
-    <section id="features" class="features">
+    <section id="problem" class="timeline-section">
         <div class="section-title">
-            <h2>Intelligent Operations</h2>
-            <p>Designed for scale, engineered for conversion, built for Meta safety.</p>
+            <h2>The Cost of a <span style="color: #ef4444;">Missed Call</span></h2>
+            <p>Every unanswered call is a customer handed to your competitors.</p>
         </div>
-        <div class="features-grid">
-            <div class="feature-card glass">
-                <div class="feature-icon"><i class="fas fa-phone-volume"></i></div>
-                <h3>Voice Lead Recovery</h3>
-                <p>Automatically detect missed calls and initiate AI-driven conversational follow-ups before leads go cold.</p>
+        <div class="features-grid" style="max-width: 900px; margin: 0 auto;">
+            <div class="feature-card glass" style="border-color: rgba(239, 68, 68, 0.3); text-align: center;">
+                <div style="font-size: 3rem; color: #ef4444; margin-bottom: 15px;"><i class="fas fa-phone-slash"></i></div>
+                <h3>80% Go to Competitors</h3>
+                <p>If you don't answer, they don't wait. They hang up and call the next business on Google.</p>
             </div>
-            <div class="feature-card glass">
-                <div class="feature-icon"><i class="fas fa-brain"></i></div>
-                <h3>Smart Lead Scoring</h3>
-                <p>AI categorizes and scores leads based on engagement, filtering high-intent prospects instantly.</p>
-            </div>
-            <div class="feature-card glass">
-                <div class="feature-icon"><i class="fas fa-plug"></i></div>
-                <h3>Omnichannel Sync</h3>
-                <p>Connects with WhatsApp, SMS, and your CRM in real-time. No code required.</p>
-            </div>
-            <div class="feature-card glass">
-                <div class="feature-icon"><i class="fas fa-chart-line"></i></div>
-                <h3>Predictive Analytics</h3>
-                <p>Visualize conversion bottlenecks and optimize your engagement funnels automatically.</p>
-            </div>
-            <div class="feature-card glass">
-                <div class="feature-icon"><i class="fas fa-shield-alt"></i></div>
-                <h3>Privacy First</h3>
-                <p>Fully compliant with regional data protection standards with automated data anonymization.</p>
-            </div>
-            <div class="feature-card glass">
-                <div class="feature-icon"><i class="fas fa-cogs"></i></div>
-                <h3>Workflow Automation</h3>
-                <p>Set triggers to automate appointment bookings, follow-ups, and calendar syncing seamlessly.</p>
+            <div class="feature-card glass" style="border-color: rgba(34, 211, 238, 0.3); text-align: center;">
+                <div style="font-size: 3rem; color: var(--primary); margin-bottom: 15px;"><i class="fas fa-bolt"></i></div>
+                <h3>5 Min Response Rule</h3>
+                <p>Responding to a missed call within 5 minutes increases your chance of closing the lead by 900%.</p>
             </div>
         </div>
     </section>
 
-    <section id="how-it-works" class="timeline-section">
+    <section id="features" class="features">
         <div class="section-title">
-            <h2>How Cortexia Automates Growth</h2>
-            <p>From initial contact to finalized retention.</p>
+            <h2>The Cortexia Advantage</h2>
+            <p>We don't just send a generic text. We deploy a trained AI agent to sell for you.</p>
         </div>
-        <div class="timeline">
-            <div class="timeline-item glass">
-                <div class="timeline-dot">1</div>
-                <h3>Capture</h3>
-                <p>Cortexia's Engine intercepts missed interactions across voice, web, and chat platforms securely.</p>
+        <div class="features-grid">
+            <div class="feature-card glass">
+                <div class="feature-icon"><i class="fab fa-whatsapp"></i></div>
+                <h3>Instant WhatsApp AI</h3>
+                <p>Within 3 seconds of a missed call, your AI assistant reaches out on WhatsApp, initiating a friendly conversation.</p>
             </div>
-            <div class="timeline-item glass">
-                <div class="timeline-dot">2</div>
-                <h3>Engage</h3>
-                <p>Automated logic immediately reaches out using personalized, human-like messaging on preferred channels.</p>
+            <div class="feature-card glass">
+                <div class="feature-icon"><i class="fas fa-brain"></i></div>
+                <h3>Trained on Your Business</h3>
+                <p>Upload your pricing, FAQs, and services. The AI answers questions exactly how your best salesperson would.</p>
             </div>
-            <div class="timeline-item glass">
-                <div class="timeline-dot">3</div>
-                <h3>Categorize</h3>
-                <p>Lead intent is scored using NLP, creating an organized queue for your human sales teams to finalize.</p>
+            <div class="feature-card glass">
+                <div class="feature-icon"><i class="fas fa-calendar-check"></i></div>
+                <h3>Automated Booking</h3>
+                <p>The AI can qualify the lead, check intent, and automatically push them towards booking an appointment.</p>
+            </div>
+            <div class="feature-card glass">
+                <div class="feature-icon"><i class="fas fa-desktop"></i></div>
+                <h3>Unified Dashboard</h3>
+                <p>View all AI conversations, jump in to take over manually at any time, and track your recovered revenue.</p>
+            </div>
+            <div class="feature-card glass">
+                <div class="feature-icon"><i class="fas fa-chart-pie"></i></div>
+                <h3>Drop-off Analytics</h3>
+                <p>See exactly where leads lose interest (e.g., "Dropped at Pricing") so you can fix your business offerings.</p>
+            </div>
+            <div class="feature-card glass">
+                <div class="feature-icon"><i class="fas fa-lock"></i></div>
+                <h3>Enterprise Security</h3>
+                <p>Bank-grade JWT authentication, strict RBAC, and end-to-end data isolation across the platform.</p>
             </div>
         </div>
+    </section>
+
+    <section id="roi" class="interactive-form-section" style="padding-top: 40px;">
+        <div class="form-container glass" style="background: rgba(34, 211, 238, 0.05); border-color: rgba(34, 211, 238, 0.2);">
+            <h2>Calculate Your Lost Revenue</h2>
+            <p>See how much money is slipping through the cracks every month.</p>
+            
+            <div style="text-align: left; margin-top: 30px;">
+                <label style="color: var(--text-secondary); font-size: 0.9rem;">Missed Calls per Month: <span id="missed-calls-val" style="color: #fff; font-weight: bold;">50</span></label>
+                <input type="range" id="missed-calls" min="10" max="500" value="50" style="width: 100%; margin: 10px 0 25px;" oninput="document.getElementById('missed-calls-val').innerText = this.value; calculateROI();">
+                
+                <label style="color: var(--text-secondary); font-size: 0.9rem;">Average Value of One Client (₹): <span id="client-val-display" style="color: #fff; font-weight: bold;">5000</span></label>
+                <input type="range" id="client-value" min="500" max="50000" step="500" value="5000" style="width: 100%; margin: 10px 0 25px;" oninput="document.getElementById('client-val-display').innerText = this.value; calculateROI();">
+            </div>
+            
+            <div style="background: rgba(0,0,0,0.5); padding: 25px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); margin-top: 20px;">
+                <p style="font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-secondary); margin-bottom: 5px;">Revenue Recovered by Cortexia</p>
+                <h3 id="roi-result" class="gradient-text" style="font-size: 3rem;">₹50,000 / mo</h3>
+                <p style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 10px;">Assuming a conservative 20% AI conversion rate.</p>
+            </div>
+        </div>
+        
+        <script>
+            function calculateROI() {
+                const calls = parseInt(document.getElementById('missed-calls').value);
+                const val = parseInt(document.getElementById('client-value').value);
+                const recovered = calls * 0.20 * val; // 20% conversion
+                document.getElementById('roi-result').innerText = '₹' + recovered.toLocaleString('en-IN') + ' / mo';
+            }
+        </script>
     </section>
 
     <section id="faq" class="faq-section">
@@ -161,7 +178,7 @@
                     <i class="fas fa-plus"></i>
                 </div>
                 <div class="faq-answer">
-                    <p>Yes. Cortexia is a product of LEAD RECOVERY, maintaining strict privacy protocols, encryption standards, and adherence to business regulations including ISO 27001 guidelines.</p>
+                    <p>Yes. Cortexia is a product of Cortexia Labs, maintaining strict privacy protocols, encryption standards, and adherence to business regulations including ISO 27001 guidelines.</p>
                 </div>
             </div>
             <div class="faq-item">
@@ -187,18 +204,21 @@
 
     <section id="contact" class="interactive-form-section">
         <div class="form-container glass">
-            <h2>Request Enterprise Access</h2>
-            <p>Join the future of engagement automation.</p>
+            <h2>Request Demo</h2>
+            <p>Schedule a walkthrough or request custom automation.</p>
             <form id="contact-form" onsubmit="submitForm(event)">
                 <input type="hidden" name="access_key" value="8a578693-04df-4047-bbc5-68f56ccd17aa">
                 <input type="hidden" name="subject" value="New Demo Request for Cortexia">
                 <div class="input-group">
                     <input type="text" name="name" id="name" placeholder="Full Name" required>
-                    <input type="email" name="email" id="email" placeholder="Work Email" required>
+                    <input type="text" name="phone" id="phone" placeholder="WhatsApp Number" required>
                 </div>
-                <input type="text" name="company" id="company" placeholder="Company Name" required>
+                <div class="input-group">
+                    <input type="text" name="company" id="company" placeholder="Business / Clinic Name" required>
+                    <input type="number" name="leads" id="leads" placeholder="Expected Monthly Leads" required>
+                </div>
                 <button type="submit" class="btn btn-primary" id="submit-btn" style="width: 100%; margin-top: 20px;">
-                    Send Request <i class="fas fa-paper-plane" style="margin-left: 8px;"></i>
+                    Request Demo <i class="fas fa-paper-plane" style="margin-left: 8px;"></i>
                 </button>
                 <div class="success-message" id="success-msg" style="display: none; color: var(--primary); margin-top: 15px; text-align: center;">
                     <i class="fas fa-check-circle"></i> Request received. A Cortexia representative will contact you shortly.
@@ -215,9 +235,7 @@
         </div>
         <div class="footer-bottom">
             <p>&copy; 2026 Cortexia Labs. All rights reserved.</p>
-            <p>Cortexia is a technology brand operated by <strong>LEAD RECOVERY</strong>.</p>
-            <p>Udyam Registration No: <span>UDYAM-MH-26-1081882</span></p>
-            <p>Registered Address: <span>Flat no. 201, Vasanti Building, Block 1, Government College Road, Ambegaon, Manchar, Pune, Maharashtra 410503</span></p>
+
             <p>Contact: <a href="mailto:admin@cortexia.shop">admin@cortexia.shop</a></p>
         </div>
     </footer>

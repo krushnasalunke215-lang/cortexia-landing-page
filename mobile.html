@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+  <meta name="theme-color" content="#0f172a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="description" content="Cortexia — AI Lead Recovery Dashboard">
+  <meta name="mobile-web-app-capable" content="yes">
+  <title>Cortexia</title>
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" href="/icons/icon-192.png">
+  <link rel="apple-touch-icon" href="/icons/icon-192.png">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/mobile.css?v=16">
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="login-screen" id="login-screen">
+  <div class="login-card">
+    <h1><img src="/icons/logo.jpg" style="width:36px;height:36px;vertical-align:middle;margin-right:10px;border-radius:8px">Cortexia</h1>
+    <p>Client Login</p>
+    <div class="login-error" id="login-error"></div>
+    <form onsubmit="event.preventDefault();login()">
+      <input type="text" id="login-email" placeholder="Email or ID" autocomplete="username" inputmode="email">
+      <input type="password" id="login-password" placeholder="Password" autocomplete="current-password">
+      <button type="submit" class="btn-primary" id="login-btn">Sign In</button>
+    </form>
+  </div>
+</div>
+
+<!-- SIDEBAR OVERLAY -->
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
+
+<!-- SIDEBAR (Navigation launcher only) -->
+<nav class="sidebar" id="sidebar">
+  <button class="sidebar-close" onclick="closeSidebar()" aria-label="Close"><i class="fas fa-times"></i></button>
+  <div class="sidebar-header">
+    <h2><img src="/icons/logo.jpg" style="width:26px;height:26px;vertical-align:middle;margin-right:8px;border-radius:6px">Cortexia</h2>
+    <p>Business Dashboard</p>
+  </div>
+  <div class="sidebar-nav">
+    <button class="sidebar-link" onclick="openPage('analytics')"><i class="fas fa-chart-line"></i><span>Analytics</span><i class="fas fa-chevron-right sb-arrow"></i></button>
+    <button class="sidebar-link" onclick="openPage('pricing')"><i class="fas fa-crown"></i><span>Plans & Pricing</span><i class="fas fa-chevron-right sb-arrow"></i></button>
+    <button class="sidebar-link" onclick="openPage('support')"><i class="fas fa-life-ring"></i><span>Support</span><i class="fas fa-chevron-right sb-arrow"></i></button>
+    <div class="sidebar-divider"></div>
+    <button class="sidebar-link" onclick="switchTab('profile');closeSidebar()"><i class="fas fa-user-cog"></i><span>Profile</span><i class="fas fa-chevron-right sb-arrow"></i></button>
+    <button class="sidebar-link danger" onclick="logout()"><i class="fas fa-sign-out-alt"></i><span>Logout</span></button>
+  </div>
+</nav>
+
+<!-- APP SHELL -->
+<div class="app" id="app-shell" style="display:none">
+
+  <!-- Header Bar -->
+  <div class="header-bar">
+    <button class="hamburger-btn" onclick="openSidebar()" aria-label="Menu"><i class="fas fa-bars"></i></button>
+    <div class="header-logo"><img src="/icons/logo.jpg" style="width:24px;height:24px;vertical-align:middle;margin-right:8px;border-radius:4px"> Cortexia</div>
+  </div>
+
+  <!-- Offline Banner -->
+  <div class="offline-banner" id="offline-banner">⚠ No internet connection</div>
+
+  <!-- In-App Notification Toast -->
+  <div class="notif-toast" id="notif-toast" onclick="onToastClick()">
+    <div class="notif-toast-icon"><i class="fas fa-bell" id="notif-toast-icon-el"></i></div>
+    <div class="notif-toast-body">
+      <div class="notif-toast-title" id="notif-toast-title">New message</div>
+      <div class="notif-toast-sub" id="notif-toast-sub"></div>
+    </div>
+    <button class="notif-toast-close" onclick="event.stopPropagation();hideToast()">×</button>
+  </div>
+
+  <!-- HOME / LEADS VIEW -->
+  <div class="view active" id="view-leads">
+    <div class="topbar">
+      <h2>🏠 Home</h2>
+      <div class="topbar-sub">Operational dashboard</div>
+    </div>
+    <div class="search-box">
+      <i class="fas fa-search"></i>
+      <input type="text" placeholder="Search by phone..." oninput="filterLeads(this.value)" inputmode="tel">
+    </div>
+    <div class="card-list" id="leads-list"></div>
+  </div>
+
+  <!-- CHATS VIEW -->
+  <div class="view" id="view-chats">
+    <div class="topbar">
+      <h2>💬 Chats</h2>
+      <div class="topbar-sub">Active conversations</div>
+    </div>
+    <div class="card-list" id="chats-list"></div>
+  </div>
+
+  <!-- BOOKINGS VIEW -->
+  <div class="view" id="view-bookings">
+    <div class="topbar">
+      <h2>📅 Bookings</h2>
+      <div class="topbar-sub">Travel booking details</div>
+    </div>
+    <!-- Doctor Export Buttons (shown only for doctor flow) -->
+    <div id="doctor-export-bar" style="display:none;padding:0 16px 8px;flex-shrink:0">
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn-action btn-confirm" onclick="exportDoctorCSV('patients')" style="flex:1;min-width:80px"><i class="fas fa-users" style="margin-right:4px"></i>Patients</button>
+        <button class="btn-action btn-pending" onclick="exportDoctorCSV('appointments')" style="flex:1;min-width:80px"><i class="fas fa-calendar" style="margin-right:4px"></i>Appts</button>
+        <button class="btn-action btn-note" onclick="exportDoctorCSV('records')" style="flex:1;min-width:80px"><i class="fas fa-file-medical" style="margin-right:4px"></i>Records</button>
+      </div>
+    </div>
+    <!-- Appointment Filters (shown for doctor flow) -->
+    <div id="doctor-appt-filters" style="display:none;padding:0 16px 8px;flex-shrink:0">
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <input type="date" id="appt-date-filter" onchange="filterAppointments()" style="flex:1;padding:8px 12px;border-radius:10px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-family:inherit;font-size:13px">
+        <select id="appt-status-filter" onchange="filterAppointments()" style="flex:1;padding:8px 12px;border-radius:10px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-family:inherit;font-size:13px">
+          <option value="">All Status</option>
+          <option value="PENDING">Pending</option>
+          <option value="CONFIRMED">Confirmed</option>
+          <option value="ARRIVED">Arrived</option>
+          <option value="COMPLETED">Completed</option>
+          <option value="CANCELLED">Cancelled</option>
+          <option value="NO_SHOW">No-show</option>
+        </select>
+      </div>
+    </div>
+    <div class="card-list" id="bookings-list"></div>
+  </div>
+
+  <!-- VEHICLES VIEW -->
+  <div class="view" id="view-vehicles">
+    <div class="topbar">
+      <h2>🚌 Vehicles</h2>
+      <div class="topbar-sub">Fleet overview</div>
+    </div>
+    <div class="card-list" id="vehicles-list"></div>
+  </div>
+
+  <!-- NOTIFICATIONS VIEW -->
+  <div class="view" id="view-notifications">
+    <div class="topbar">
+      <h2>🔔 Activity</h2>
+      <div class="topbar-sub">Recent lead activity</div>
+    </div>
+    <div class="card-list" id="notif-list"></div>
+  </div>
+
+  <!-- PROFILE VIEW -->
+  <div class="view" id="view-profile">
+    <div class="topbar">
+      <h2>👤 Profile</h2>
+      <div class="topbar-sub">Business settings</div>
+    </div>
+    <div class="card-list">
+      <div class="profile-card">
+        <h3>📊 Overview</h3>
+        <div class="profile-row"><span>Total Leads</span><span id="profile-leads">—</span></div>
+        <div class="profile-row"><span>Qualified</span><span id="profile-qualified">—</span></div>
+        <div class="profile-row clickable" onclick="openPipelineModal()"><span>Pipeline Value</span><span id="profile-value">—</span><i class="fas fa-pen" style="font-size:11px;color:var(--primary-light);margin-left:8px"></i></div>
+        <div class="profile-row"><span>Gateway</span><span id="profile-gateway">—</span></div>
+      </div>
+      <div class="profile-card">
+        <h3>📨 Message Quota</h3>
+        <div class="profile-row"><span>Used</span><span id="profile-quota">—</span></div>
+        <div class="quota-bar"><div class="quota-fill" id="quota-fill" style="width:0%"></div></div>
+      </div>
+      <div class="profile-card" id="team-card" style="display:none">
+        <h3><i class="fas fa-users" style="margin-right:8px;color:var(--primary-light)"></i>Team</h3>
+        <div id="team-list" style="margin-bottom:12px">
+          <div class="loading-center"><div class="spinner"></div></div>
+        </div>
+        <button class="btn-action btn-confirm" id="invite-btn" onclick="openInviteModal()" style="width:100%">
+          <i class="fas fa-user-plus" style="margin-right:6px"></i>Invite Member
+        </button>
+      </div>
+      <div class="profile-card">
+        <div class="profile-row"><span>Your Role</span><span id="profile-role" class="role-badge">—</span></div>
+      </div>
+      <button class="btn-logout" onclick="logout()"><i class="fas fa-sign-out-alt" style="margin-right:8px"></i>Logout</button>
+    </div>
+  </div>
+  <!-- PATIENTS VIEW (Doctor module) -->
+  <div class="view" id="view-patients" style="display:none">
+    <div class="topbar">
+      <h2>🏥 Patients</h2>
+      <div class="topbar-sub">Patient health profiles</div>
+    </div>
+    <div class="search-box">
+      <i class="fas fa-search"></i>
+      <input type="text" placeholder="Search patients..." oninput="filterPatients(this.value)" inputmode="text">
+    </div>
+    <div class="card-list" id="patients-list"></div>
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <nav class="bottom-nav">
+    <button class="nav-tab active" id="tab-leads" onclick="switchTab('leads')">
+      <i class="fas fa-home"></i><span>Home</span>
+      <span class="nav-badge" id="leads-badge" style="display:none">0</span>
+    </button>
+    <button class="nav-tab" id="tab-chats" onclick="switchTab('chats')"><i class="fas fa-comments"></i><span>Chats</span></button>
+    <button class="nav-tab" id="tab-bookings" onclick="switchTab('bookings')"><i class="fas fa-calendar-check"></i><span>Bookings</span></button>
+    <button class="nav-tab" id="tab-notifications" onclick="switchTab('notifications')" style="position:relative">
+      <i class="fas fa-bell"></i><span>Alerts</span>
+      <span class="nav-badge" id="notif-badge" style="display:none">0</span>
+    </button>
+    <button class="nav-tab" id="tab-vehicles" onclick="switchTab('vehicles')" style="display:none"><i class="fas fa-bus"></i><span>Fleet</span></button>
+    <button class="nav-tab" id="tab-patients" onclick="switchTab('patients')" style="display:none"><i class="fas fa-stethoscope"></i><span>Patients</span></button>
+    <button class="nav-tab" id="tab-profile" onclick="switchTab('profile')"><i class="fas fa-user"></i><span>Profile</span></button>
+  </nav>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- DEDICATED PAGES (slide-in from sidebar)    -->
+<!-- ═══════════════════════════════════════════ -->
+
+<!-- ANALYTICS PAGE -->
+<div class="page-screen" id="page-analytics" style="display:none">
+  <div class="page-header">
+    <button class="chat-back" onclick="closePage('analytics')"><i class="fas fa-arrow-left"></i></button>
+    <h3>📊 Analytics</h3>
+  </div>
+  <div class="page-body" id="analytics-body">
+    <div class="loading-center"><div class="spinner"></div><span>Loading analytics...</span></div>
+  </div>
+</div>
+
+<!-- PRICING PAGE -->
+<div class="page-screen" id="page-pricing" style="display:none">
+  <div class="page-header">
+    <button class="chat-back" onclick="closePage('pricing')"><i class="fas fa-arrow-left"></i></button>
+    <h3>👑 Plans & Pricing</h3>
+  </div>
+  <div class="page-body">
+    <!-- Starter -->
+    <div class="pricing-card">
+      <div class="pricing-badge starter">STARTER</div>
+      <div class="pricing-price">₹999<span>/month</span></div>
+      <ul class="pricing-features">
+        <li><i class="fas fa-check"></i> 500 AI messages/month</li>
+        <li><i class="fas fa-check"></i> 1 WhatsApp number</li>
+        <li><i class="fas fa-check"></i> Lead capture & recovery</li>
+        <li><i class="fas fa-check"></i> AI conversation flow</li>
+        <li><i class="fas fa-check"></i> Mobile dashboard</li>
+        <li><i class="fas fa-check"></i> Email notifications</li>
+      </ul>
+      <button class="pricing-cta" onclick="window.open('https://wa.me/917741894909?text=I%20want%20the%20Starter%20plan')">Get Started</button>
+    </div>
+    <!-- Growth -->
+    <div class="pricing-card featured">
+      <div class="pricing-popular">⭐ MOST POPULAR</div>
+      <div class="pricing-badge growth">GROWTH</div>
+      <div class="pricing-price">₹2,499<span>/month</span></div>
+      <ul class="pricing-features">
+        <li><i class="fas fa-check"></i> 2,000 AI messages/month</li>
+        <li><i class="fas fa-check"></i> Priority support</li>
+        <li><i class="fas fa-check"></i> Advanced analytics</li>
+        <li><i class="fas fa-check"></i> Booking workflows</li>
+        <li><i class="fas fa-check"></i> Media messages</li>
+        <li><i class="fas fa-check"></i> Operator takeover</li>
+        <li><i class="fas fa-check"></i> Custom follow-ups</li>
+      </ul>
+      <button class="pricing-cta featured" onclick="window.open('https://wa.me/917741894909?text=I%20want%20the%20Growth%20plan')">Upgrade Now</button>
+    </div>
+    <!-- Custom -->
+    <div class="pricing-card">
+      <div class="pricing-badge custom">CUSTOM</div>
+      <div class="pricing-price">Custom<span></span></div>
+      <ul class="pricing-features">
+        <li><i class="fas fa-check"></i> Unlimited AI messages</li>
+        <li><i class="fas fa-check"></i> Multiple WhatsApp numbers</li>
+        <li><i class="fas fa-check"></i> Dedicated account manager</li>
+        <li><i class="fas fa-check"></i> White-label options</li>
+        <li><i class="fas fa-check"></i> API access</li>
+        <li><i class="fas fa-check"></i> SLA guarantee</li>
+      </ul>
+      <button class="pricing-cta" onclick="window.open('https://wa.me/917741894909?text=I%20need%20a%20custom%20plan')">Contact Sales</button>
+    </div>
+  </div>
+</div>
+
+<!-- SUPPORT PAGE -->
+<div class="page-screen" id="page-support" style="display:none">
+  <div class="page-header">
+    <button class="chat-back" onclick="closePage('support')"><i class="fas fa-arrow-left"></i></button>
+    <h3>🛟 Support</h3>
+  </div>
+  <div class="page-body">
+    <div class="support-hero">
+      <i class="fas fa-headset"></i>
+      <h3>How can we help?</h3>
+      <p>Our team is ready to assist you</p>
+    </div>
+    <a class="support-card" href="https://wa.me/917741894909?text=Hi%20Cortexia%20Support%2C%20I%20need%20help" target="_blank">
+      <div class="support-icon" style="background:rgba(37,211,102,.15)"><i class="fab fa-whatsapp" style="color:#25d366"></i></div>
+      <div class="support-info">
+        <h4>WhatsApp Support</h4>
+        <p>Fastest response · Usually within minutes</p>
+      </div>
+      <i class="fas fa-chevron-right" style="color:var(--text-muted)"></i>
+    </a>
+    <a class="support-card" href="mailto:support@cortexia.shop">
+      <div class="support-icon" style="background:rgba(79,70,229,.15)"><i class="fas fa-envelope" style="color:var(--primary-light)"></i></div>
+      <div class="support-info">
+        <h4>Email Support</h4>
+        <p>support@cortexia.shop</p>
+      </div>
+      <i class="fas fa-chevron-right" style="color:var(--text-muted)"></i>
+    </a>
+    <a class="support-card" href="tel:+917741894909">
+      <div class="support-icon" style="background:rgba(16,185,129,.15)"><i class="fas fa-phone" style="color:var(--success)"></i></div>
+      <div class="support-info">
+        <h4>Call Us</h4>
+        <p>+91 77418 94909</p>
+      </div>
+      <i class="fas fa-chevron-right" style="color:var(--text-muted)"></i>
+    </a>
+    <div class="support-hours">
+      <i class="fas fa-clock" style="margin-right:6px"></i>Support hours: Mon–Sat, 9 AM – 8 PM IST
+    </div>
+  </div>
+</div>
+<!-- PATIENT PROFILE PAGE (Doctor module) -->
+<div class="page-screen" id="page-patient-profile" style="display:none">
+  <div class="page-header" style="flex-direction:column;align-items:stretch;padding-bottom:0">
+    <div style="display:flex;align-items:center;gap:10px">
+      <button class="chat-back" onclick="closePage('patient-profile')"><i class="fas fa-arrow-left"></i></button>
+      <h3 id="pp-title">Patient</h3>
+    </div>
+    <div id="pp-header-meta" style="display:flex;align-items:center;gap:8px;padding:6px 0 10px 42px;font-size:13px;color:var(--text-muted)">
+      <span id="pp-phone"></span>
+      <span id="pp-status" class="status-chip new" style="font-size:11px"></span>
+    </div>
+  </div>
+  <div class="page-body" id="pp-body" style="padding:0 12px 24px">
+    <div class="loading-center"><div class="spinner"></div><span>Loading patient...</span></div>
+  </div>
+</div>
+<!-- VEHICLE DETAIL PAGE -->
+<div class="page-screen" id="page-vehicle-detail" style="display:none">
+  <div class="page-header">
+    <button class="chat-back" onclick="closePage('vehicle-detail')"><i class="fas fa-arrow-left"></i></button>
+    <h3 id="vd-title">Vehicle</h3>
+  </div>
+  <div class="page-body" id="vd-body">
+    <div class="loading-center"><div class="spinner"></div><span>Loading...</span></div>
+  </div>
+</div>
+
+<!-- VEHICLE EDIT MODAL -->
+<div class="modal-overlay" id="vehicle-edit-modal" style="display:none" onclick="if(event.target===this)closeVehicleEdit()">
+  <div class="modal-card" style="max-height:85vh;overflow-y:auto">
+    <h3 style="margin-bottom:14px"><i class="fas fa-edit" style="margin-right:8px;color:var(--primary-light)"></i>Edit Vehicle</h3>
+    <label class="modal-label">Vehicle Name</label>
+    <input class="modal-input" id="ve-name" placeholder="e.g. Non AC 17 Seater">
+    <label class="modal-label">Price per KM (₹)</label>
+    <input class="modal-input" id="ve-rate" type="number" placeholder="23">
+    <label class="modal-label">Seat Count</label>
+    <input class="modal-input" id="ve-seats" type="number" placeholder="17">
+    <label class="modal-label">Features (comma separated)</label>
+    <textarea class="modal-input" id="ve-features" rows="4" placeholder="Pushback seats, WiFi, Dolby..."></textarea>
+    <label class="modal-label">Notes (comma separated)</label>
+    <textarea class="modal-input" id="ve-notes" rows="2" placeholder="Toll extra, Parking extra..."></textarea>
+    <div style="display:flex;gap:10px;margin-top:16px">
+      <button class="vd-btn-primary" id="ve-save-btn" onclick="saveVehicleEdit()" style="flex:1"><i class="fas fa-save" style="margin-right:6px"></i>Save</button>
+      <button class="vd-btn-secondary" onclick="closeVehicleEdit()" style="flex:1">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- FULL-SCREEN CHAT -->
+<div class="chat-screen" id="chat-screen" style="display:none">
+  <div class="chat-header">
+    <button class="chat-back" onclick="closeChat()" aria-label="Back"><i class="fas fa-arrow-left"></i></button>
+    <div class="lead-avatar" style="width:38px;height:38px;font-size:14px">AI</div>
+    <div class="chat-header-info">
+      <h3 id="chat-title">—</h3>
+      <span id="chat-status">—</span>
+    </div>
+  </div>
+  <div class="takeover-bar" id="takeover-bar">
+    <button class="takeover-btn pause" id="btn-pause" onclick="pauseLead()"><i class="fas fa-pause"></i> Pause AI</button>
+    <button class="takeover-btn resume" id="btn-resume" onclick="resumeLead()" style="display:none"><i class="fas fa-play"></i> Resume AI</button>
+  </div>
+  <div class="chat-messages" id="chat-messages"></div>
+  <div class="media-preview" id="media-preview">
+    <img id="media-thumb" src="" alt="preview" style="display:none">
+    <div class="file-info">
+      <div class="file-name" id="media-name">—</div>
+      <div class="file-size" id="media-size">—</div>
+    </div>
+    <button class="remove-media" onclick="removeMedia()"><i class="fas fa-times-circle"></i></button>
+  </div>
+  <div class="chat-input-bar" id="chat-input-bar">
+    <button class="attach-btn" onclick="document.getElementById('file-input').click()" aria-label="Attach"><i class="fas fa-paperclip"></i></button>
+    <input type="file" id="file-input" accept="image/*,video/*,.pdf,.doc,.docx" style="display:none" onchange="handleFileSelect(event)">
+    <textarea id="chat-textarea" placeholder="Type a message..." rows="1" oninput="autoResizeTextarea(this)"></textarea>
+    <button class="send-btn" id="send-btn" onclick="sendManualMessage()" aria-label="Send"><i class="fas fa-paper-plane"></i></button>
+  </div>
+</div>
+
+<!-- PIPELINE EDIT MODAL -->
+<div class="modal-overlay" id="pipeline-modal" style="display:none" onclick="closePipelineModal(event)">
+  <div class="modal-card" onclick="event.stopPropagation()">
+    <h3>💰 Edit Pipeline Value</h3>
+    <p>Set the estimated value per qualified lead</p>
+    <div class="modal-input-group">
+      <span class="modal-prefix">₹</span>
+      <input type="number" id="pipeline-input" placeholder="50000" min="0" max="10000000" inputmode="numeric">
+    </div>
+    <div class="modal-actions">
+      <button class="modal-btn cancel" onclick="closePipelineModal()">Cancel</button>
+      <button class="modal-btn save" id="pipeline-save-btn" onclick="savePipelineValue()">Save</button>
+    </div>
+  </div>
+</div>
+<!-- INVITE TEAM MEMBER MODAL -->
+<div class="modal-overlay" id="invite-modal" style="display:none" onclick="if(event.target===this)closeInviteModal()">
+  <div class="modal-card" onclick="event.stopPropagation()">
+    <h3 style="margin-bottom:4px"><i class="fas fa-user-plus" style="margin-right:8px;color:var(--primary-light)"></i>Invite Team Member</h3>
+    <p style="color:var(--text-muted);font-size:13px;margin-bottom:12px">They will get a login account for this business</p>
+    <input class="modal-input" id="invite-email" type="email" placeholder="Email address" style="margin-bottom:8px">
+    <input class="modal-input" id="invite-name" type="text" placeholder="Display name (optional)" style="margin-bottom:8px">
+    <select class="modal-input" id="invite-role" style="margin-bottom:8px">
+      <option value="receptionist">Receptionist</option>
+      <option value="doctor">Doctor</option>
+      <option value="admin">Admin</option>
+    </select>
+    <input class="modal-input" id="invite-password" type="text" placeholder="Temp password (auto-generated if empty)" style="margin-bottom:4px">
+    <div id="invite-result" style="display:none;padding:8px;border-radius:8px;margin-top:8px;font-size:13px"></div>
+    <div style="display:flex;gap:10px;margin-top:14px">
+      <button class="modal-btn cancel" onclick="closeInviteModal()">Cancel</button>
+      <button class="modal-btn save" id="invite-save-btn" onclick="submitInvite()">Invite</button>
+    </div>
+  </div>
+</div>
+
+<!-- NOTES MODAL -->
+<div class="modal-overlay" id="notes-modal" style="display:none" onclick="if(event.target===this)closeNotesModal()">
+  <div class="modal-card" onclick="event.stopPropagation()">
+    <h3 style="margin-bottom:4px"><i class="fas fa-sticky-note" style="margin-right:8px;color:var(--primary-light)"></i>Appointment Notes</h3>
+    <p>Add an internal note for this appointment</p>
+    <textarea class="modal-input" id="notes-input" rows="4" placeholder="Type notes here..."></textarea>
+    <div style="display:flex;gap:10px;margin-top:14px">
+      <button class="modal-btn cancel" onclick="closeNotesModal()">Cancel</button>
+      <button class="modal-btn save" id="notes-save-btn" onclick="saveNotesModal()">Save Note</button>
+    </div>
+  </div>
+</div>
+
+<script src="/mobile.js?v=16"></script>
+</body>
+</html>

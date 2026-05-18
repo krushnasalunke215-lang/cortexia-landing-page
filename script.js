@@ -1,4 +1,11 @@
 document.addEventListener('DOMContentLoaded', () => {
+    /* --- Mobile Menu Toggle --- */
+    const mobileBtn = document.querySelector('.mobile-menu-btn');
+    if (mobileBtn) {
+        mobileBtn.addEventListener('click', () => {
+            document.querySelector('.nav-links').classList.toggle('active');
+        });
+    }
 
     /* --- Scroll Reveal Animations --- */
     const animatedElements = document.querySelectorAll('.feature-card, .timeline-item, .content-block, .form-container');
