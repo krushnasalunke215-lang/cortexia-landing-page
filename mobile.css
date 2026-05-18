@@ -477,5 +477,5 @@ textarea.modal-input{resize:vertical;min-height:44px}
 .pp-actions .btn-action{flex:1;padding:12px;font-size:14px;font-weight:600;border-radius:12px;display:flex;align-items:center;justify-content:center}
 
 /* ── Alert Notifications ─────────────────── */
-.notif-alert{border-left:3px solid #EF4444;background:rgba(239,68,68,.04)}
-.notif-unread{border-left:3px solid var(--primary);background:rgba(16,185,129,.04)}
+.notif-alert{border-left:4px solid #EF4444 !important;background:rgba(239,68,68,.04) !important}
+.notif-unread{border-left:4px solid var(--primary) !important;background:rgba(16,185,129,.04)}

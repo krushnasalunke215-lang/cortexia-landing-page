@@ -1582,18 +1582,31 @@ async function loadNotifications() {
       data.notifications.forEach(n => {
         const d = document.createElement('div');
         d.className = 'lead-card' + (n.is_read ? '' : ' notif-unread') + (n.type === 'alert' ? ' notif-alert' : '');
+        
         var typeIcon = n.type === 'alert' ? 'fa-exclamation-triangle'
           : n.type === 'reminder' ? 'fa-clock'
           : n.type === 'booking' ? 'fa-bus' : n.type === 'confirmed' ? 'fa-check-circle'
           : n.type === 'new_lead' ? 'fa-phone' : 'fa-comment';
+        
         var typeColor = n.type === 'alert' ? '#EF4444'
           : n.type === 'reminder' ? '#8B5CF6'
           : n.type === 'booking' ? '#6366f1' : n.type === 'confirmed' ? '#10b981'
           : n.type === 'new_lead' ? '#f59e0b' : '#3b82f6';
-        d.innerHTML = `<div class="lead-avatar" style="background:${typeColor};font-size:16px"><i class="fas ${typeIcon}"></i></div>
-          <div class="lead-info">
-            <div class="lead-phone">${esc(n.title)}</div>
-            <div class="lead-source">${esc(n.body || '')} · ${fmtTime(n.created_at)}</div>
+          
+        var bodyText = n.body || '';
+        if (bodyText.includes('http') && (bodyText.includes('.jpg') || bodyText.includes('.jpeg') || bodyText.includes('.png') || bodyText.includes('.webp'))) {
+            bodyText = '🖼️ Sent an image';
+        } else if (bodyText.includes('http') && bodyText.includes('.pdf')) {
+            bodyText = '📄 Sent a report';
+        } else if (bodyText.startsWith('http')) {
+            bodyText = '📎 Attached a file';
+        }
+
+        d.innerHTML = `<div style="width:38px;height:38px;border-radius:50%;background:${typeColor};color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0"><i class="fas ${typeIcon}" style="font-size:15px"></i></div>
+          <div class="lead-info" style="margin-left:4px">
+            <div class="lead-phone" style="font-size:14px">${esc(n.title)}</div>
+            <div class="lead-source" style="font-size:12px;margin-top:2px;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(bodyText)}</div>
+            <div style="font-size:10px;color:var(--text-muted);margin-top:4px;opacity:0.8"><i class="fas fa-clock" style="margin-right:3px"></i>${fmtTime(n.created_at)}</div>
           </div>`;
         frag.appendChild(d);
       });
