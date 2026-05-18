@@ -1736,6 +1736,78 @@ async function loadProfile() {
   } else {
     if (teamCard) teamCard.style.display = 'none';
   }
+
+  // Google Calendar card (doctors/owners only)
+  if (userRole === 'owner' || userRole === 'admin' || userRole === 'doctor') {
+    var gcalCard = $('#gcal-card');
+    if (gcalCard) gcalCard.style.display = '';
+    gcalLoadStatus();
+  }
+}
+
+/* ── Google Calendar Integration ─────────── */
+async function gcalLoadStatus() {
+  try {
+    var data = await api('/api/gcal/status');
+    var connView = $('#gcal-connected-view');
+    var disconnView = $('#gcal-disconnected-view');
+    var emailEl = $('#gcal-email');
+    if (data.connected) {
+      if (connView) connView.style.display = '';
+      if (disconnView) disconnView.style.display = 'none';
+      if (emailEl) emailEl.textContent = data.email || 'Connected';
+    } else {
+      if (connView) connView.style.display = 'none';
+      if (disconnView) disconnView.style.display = '';
+    }
+  } catch (e) {
+    console.warn('[GCal] Status check failed:', e.message);
+  }
+}
+
+async function gcalConnect() {
+  var btn = $('#gcal-connect-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Opening Google...'; }
+  try {
+    var data = await api('/api/gcal/connect');
+    if (!data.url) throw new Error('No URL returned');
+    // Open consent screen in new tab
+    var win = window.open(data.url, '_blank');
+    if (btn) { btn.textContent = 'Waiting for authorization...'; }
+    // Poll until the window closes or user completes OAuth
+    var pollInterval = setInterval(async function() {
+      // Re-check status every 3s for up to 2 min
+      try {
+        var status = await api('/api/gcal/status');
+        if (status.connected) {
+          clearInterval(pollInterval);
+          if (win && !win.closed) win.close();
+          gcalLoadStatus();
+          if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fab fa-google" style="margin-right:8px"></i>Connect Google Calendar'; }
+          showToast('✅ Google Calendar connected!');
+        }
+      } catch (ex) { /* retry */ }
+    }, 3000);
+    // Stop polling after 2 minutes
+    setTimeout(function() {
+      clearInterval(pollInterval);
+      if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fab fa-google" style="margin-right:8px"></i>Connect Google Calendar'; }
+    }, 120000);
+  } catch (e) {
+    if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fab fa-google" style="margin-right:8px"></i>Connect Google Calendar'; }
+    alert('Could not start Google authorization: ' + e.message);
+  }
+}
+
+async function gcalDisconnect() {
+  if (!confirm('Disconnect Google Calendar? Future appointments will not be synced.')) return;
+  try {
+    await api('/api/gcal/disconnect', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' });
+    gcalLoadStatus();
+    showToast('Google Calendar disconnected.');
+  } catch (e) {
+    alert('Could not disconnect: ' + e.message);
+  }
 }
 
 /* ── Role-Based Tab Visibility ────────────── */
@@ -1961,6 +2033,15 @@ function esc(s) {
   const d = document.createElement('div');
   d.textContent = String(s || '');
   return d.innerHTML;
+}
+function showToast(msg, duration) {
+  duration = duration || 3000;
+  var t = document.createElement('div');
+  t.textContent = msg;
+  t.style.cssText = 'position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--surface);border:1px solid var(--border);color:var(--text);padding:10px 20px;border-radius:20px;font-size:14px;font-weight:600;z-index:9999;opacity:0;transition:all .3s;box-shadow:0 4px 20px rgba(0,0,0,.4);white-space:nowrap';
+  document.body.appendChild(t);
+  requestAnimationFrame(function() { t.style.opacity = '1'; t.style.transform = 'translateX(-50%) translateY(0)'; });
+  setTimeout(function() { t.style.opacity = '0'; setTimeout(function() { t.remove(); }, 300); }, duration);
 }
 function fmtTime(s) {
   try { return new Date((s || '').replace(' ', 'T')).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }); }
