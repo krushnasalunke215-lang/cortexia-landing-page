@@ -1,760 +1,485 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cortexia - Live Dashboard</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-    <style>
-        body { font-family: 'Outfit', sans-serif; }
-        .scrollbar-hide::-webkit-scrollbar { display: none; }
-        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
-        .glass-panel { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(10px); }
-        .mesh-bg { background-color: #0f172a; background-image: radial-gradient(at 40% 20%, hsla(253,82%,39%,0.4) 0px, transparent 50%), radial-gradient(at 80% 0%, hsla(189,100%,56%,0.2) 0px, transparent 50%), radial-gradient(at 0% 50%, hsla(333,100%,54%,0.4) 0px, transparent 50%); }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+  <meta name="theme-color" content="#0f172a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="description" content="Cortexia — AI Lead Recovery Dashboard">
+  <meta name="mobile-web-app-capable" content="yes">
+  <title>Cortexia</title>
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" href="/icons/icon-192.png">
+  <link rel="apple-touch-icon" href="/icons/icon-192.png">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/mobile.css?v=16">
 </head>
-<body class="bg-slate-50 h-screen overflow-hidden">
+<body>
 
-    <!-- LOGIN SCREEN -->
-    <div id="login-wrapper" class="w-full h-full flex items-center justify-center bg-slate-900 relative z-50">
-        <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCI+PHBhdGggZD0iTTAgMGg0MHY0MEgweiIgZmlsbD0ibm9uZSIvPPHBhdGggZD0iTTAgMGgyMHYyMEgweiIgZmlsbD0icmdiYSgyNTUsMjU1LDI1NSwwLjAyKSIvPjwvc3ZnPg==')] opacity-20"></div>
-        <div class="bg-slate-800 p-10 rounded-2xl shadow-2xl border border-slate-700 w-96 relative z-10 flex flex-col backdrop-blur-md">
-            <div class="text-center mb-8">
-                <h1 class="text-3xl font-bold tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-indigo-400"><i class="fas fa-robot text-cyan-400 mr-2"></i> Cortexia</h1>
-                <p class="text-xs text-slate-400 mt-2 font-semibold tracking-widest uppercase">Client Login</p>
-            </div>
-            
-            <div id="login-error" class="hidden mb-4 bg-rose-500/10 border border-rose-500/50 text-rose-400 text-xs p-3 rounded-lg text-center font-bold">Invalid credentials</div>
-            
-            <form id="login-form" action="javascript:void(0);" onsubmit="handleLogin()" class="flex flex-col">
-                <input type="text" id="login-email" placeholder="Email Address or ID" class="w-full bg-slate-900/50 border border-slate-600 text-white text-sm rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 mb-4 transition" value="">
-                <input type="password" id="login-password" placeholder="Password" class="w-full bg-slate-900/50 border border-slate-600 text-white text-sm rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 mb-6 transition" value="">
-                
-                <button type="submit" class="w-full bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-400 hover:to-purple-500 text-white text-sm font-bold py-3 px-4 rounded-xl transition shadow-lg shadow-indigo-500/30 uppercase tracking-wider">
-                    Sign In
-                </button>
-            </form>
-        </div>
+<!-- LOGIN -->
+<div class="login-screen" id="login-screen">
+  <div class="login-card">
+    <h1><img src="/icons/logo.jpg" style="width:36px;height:36px;vertical-align:middle;margin-right:10px;border-radius:8px">Cortexia</h1>
+    <p>Client Login</p>
+    <div class="login-error" id="login-error"></div>
+    <form onsubmit="event.preventDefault();login()">
+      <input type="text" id="login-email" placeholder="Email or ID" autocomplete="username" inputmode="email">
+      <input type="password" id="login-password" placeholder="Password" autocomplete="current-password">
+      <button type="submit" class="btn-primary" id="login-btn">Sign In</button>
+    </form>
+  </div>
+</div>
+
+<!-- SIDEBAR OVERLAY -->
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
+
+<!-- SIDEBAR (Navigation launcher only) -->
+<nav class="sidebar" id="sidebar">
+  <button class="sidebar-close" onclick="closeSidebar()" aria-label="Close"><i class="fas fa-times"></i></button>
+  <div class="sidebar-header">
+    <h2><img src="/icons/logo.jpg" style="width:26px;height:26px;vertical-align:middle;margin-right:8px;border-radius:6px">Cortexia</h2>
+    <p>Business Dashboard</p>
+  </div>
+  <div class="sidebar-nav">
+    <button class="sidebar-link" onclick="openPage('analytics')"><i class="fas fa-chart-line"></i><span>Analytics</span><i class="fas fa-chevron-right sb-arrow"></i></button>
+    <button class="sidebar-link" onclick="openPage('pricing')"><i class="fas fa-crown"></i><span>Plans & Pricing</span><i class="fas fa-chevron-right sb-arrow"></i></button>
+    <button class="sidebar-link" onclick="openPage('support')"><i class="fas fa-life-ring"></i><span>Support</span><i class="fas fa-chevron-right sb-arrow"></i></button>
+    <div class="sidebar-divider"></div>
+    <button class="sidebar-link" onclick="switchTab('profile');closeSidebar()"><i class="fas fa-user-cog"></i><span>Profile</span><i class="fas fa-chevron-right sb-arrow"></i></button>
+    <button class="sidebar-link danger" onclick="logout()"><i class="fas fa-sign-out-alt"></i><span>Logout</span></button>
+  </div>
+</nav>
+
+<!-- APP SHELL -->
+<div class="app" id="app-shell" style="display:none">
+
+  <!-- Header Bar -->
+  <div class="header-bar">
+    <button class="hamburger-btn" onclick="openSidebar()" aria-label="Menu"><i class="fas fa-bars"></i></button>
+    <div class="header-logo"><img src="/icons/logo.jpg" style="width:24px;height:24px;vertical-align:middle;margin-right:8px;border-radius:4px"> Cortexia</div>
+  </div>
+
+  <!-- Offline Banner -->
+  <div class="offline-banner" id="offline-banner">⚠ No internet connection</div>
+
+  <!-- In-App Notification Toast -->
+  <div class="notif-toast" id="notif-toast" onclick="onToastClick()">
+    <div class="notif-toast-icon"><i class="fas fa-bell" id="notif-toast-icon-el"></i></div>
+    <div class="notif-toast-body">
+      <div class="notif-toast-title" id="notif-toast-title">New message</div>
+      <div class="notif-toast-sub" id="notif-toast-sub"></div>
     </div>
+    <button class="notif-toast-close" onclick="event.stopPropagation();hideToast()">×</button>
+  </div>
 
-    <!-- DASHBOARD WRAPPER (Hidden by default) -->
-    <div id="dashboard-wrapper" class="hidden w-full h-full flex">
-        <!-- Global Navigation Sidebar -->
-    <div id="sidebar" class="w-64 mesh-bg text-white flex-col h-full shadow-[20px_0_40px_rgba(0,0,0,0.5)] z-[100] absolute md:relative transform -translate-x-full md:translate-x-0 transition-transform duration-300 flex">
-        <div class="p-6 border-b border-white/10 relative">
-            <button class="absolute top-6 right-6 text-white/50 hover:text-white transition" onclick="toggleSidebar()">
-                <i class="fas fa-times text-xl"></i>
-            </button>
-            <h1 class="text-2xl font-bold tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-indigo-400"><i class="fas fa-robot text-cyan-400 mr-2"></i> Cortexia</h1>
-            <div class="flex items-center mt-2">
-                <span class="text-[10px] bg-white/10 text-cyan-300 py-1 px-2 rounded-md font-bold uppercase tracking-widest border border-white/20 shadow-sm">Starter Plan</span>
-            </div>
-        </div>
-        
-        <div class="flex-1 overflow-y-auto py-4">
-            <p class="px-6 text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">Core Features</p>
-            <a href="#" onclick="showView('inbox')" id="nav-inbox" class="flex items-center px-6 py-3 bg-gradient-to-r from-indigo-500/20 to-transparent border-l-4 border-cyan-400 text-white font-semibold">
-                <div class="w-8 h-8 rounded-lg bg-indigo-500/30 flex items-center justify-center mr-3 shadow-inner border border-white/10"><i class="fas fa-comment-dots text-cyan-300"></i></div> Live Chats
-            </a>
-
-            <a href="#" onclick="showView('analytics')" id="nav-analytics" class="flex items-center px-6 py-3 text-slate-300 hover:text-white hover:bg-white/5 transition font-semibold group">
-                <div class="w-8 h-8 rounded-lg flex items-center justify-center mr-3 group-hover:bg-white/10 transition"><i class="fas fa-chart-simple text-pink-400"></i></div> Analytics
-            </a>
-
-            <p class="px-6 text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-8 mb-3">Growth (Premium)</p>
-            <a href="#" onclick="triggerUpgrade('growth')" class="flex items-center px-6 py-3 text-slate-400 hover:text-white hover:bg-white/5 transition font-semibold group cursor-pointer">
-                <div class="w-8 h-8 rounded-lg flex items-center justify-center mr-3"><i class="fas fa-calendar-check opacity-70"></i></div> AI Booking 
-                <i class="fas fa-lock ml-auto text-[10px] text-pink-400 opacity-50 group-hover:opacity-100"></i>
-            </a>
-            <a href="#" onclick="triggerUpgrade('growth')" class="flex items-center px-6 py-3 text-slate-400 hover:text-white hover:bg-white/5 transition font-semibold group cursor-pointer">
-                <div class="w-8 h-8 rounded-lg flex items-center justify-center mr-3"><i class="fas fa-bolt opacity-70"></i></div> Automations 
-                <i class="fas fa-lock ml-auto text-[10px] text-pink-400 opacity-50 group-hover:opacity-100"></i>
-            </a>
-
-            <p class="px-6 text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-8 mb-3">Custom Solutions</p>
-            <a href="#" onclick="alert('Please email us at admin@cortexia.shop to request a Custom Integration.')" class="flex items-center px-6 py-3 text-slate-400 hover:text-white hover:bg-white/5 transition font-semibold group cursor-pointer">
-                <div class="w-8 h-8 rounded-lg flex items-center justify-center mr-3"><i class="fas fa-plug opacity-70"></i></div> Custom Integration 
-                <i class="fas fa-envelope ml-auto text-[10px] text-pink-400 opacity-50 group-hover:opacity-100"></i>
-            </a>
-            
-            <a href="#" onclick="logout()" class="flex items-center px-6 py-3 mt-4 text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 transition font-semibold group cursor-pointer">
-                <div class="w-8 h-8 rounded-lg flex items-center justify-center mr-3"><i class="fas fa-sign-out-alt opacity-70"></i></div> Logout 
-            </a>
-        </div>
-        
-        <div class="p-5 bg-black/40 backdrop-blur-md">
-            <!-- 10/10 Premium Analytics Block -->
-            <div class="flex justify-between items-center mb-4 px-1">
-                <div class="text-center">
-                    <p class="text-slate-400 text-[9px] uppercase font-bold tracking-widest mb-1">Revenue Saved</p>
-                    <p class="text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-300 font-bold text-lg drop-shadow-md" id="sidebar-stat-revenue">...</p>
-                </div>
-                <div class="h-6 border-l border-white/10"></div>
-                <div class="text-center">
-                    <p class="text-slate-400 text-[9px] uppercase font-bold tracking-widest mb-1">Leads Won</p>
-                    <p class="text-white font-bold text-lg drop-shadow-md" id="sidebar-stat-leads">...</p>
-                </div>
-            </div>
-
-            <div class="bg-white/5 p-4 rounded-xl border border-white/10">
-                <div class="flex justify-between items-center mb-2">
-                    <span class="text-[10px] text-slate-300 font-bold uppercase tracking-wider">Msg Quota</span>
-                    <span class="text-xs text-pink-400 font-bold" id="sidebar-quota-text">...</span>
-                </div>
-                <div class="w-full bg-black/50 rounded-full h-1.5 mb-4 shadow-inner">
-                    <div id="sidebar-quota-bar" class="bg-gradient-to-r from-pink-500 to-rose-400 h-1.5 rounded-full shadow-lg" style="width: 0%"></div>
-                </div>
-                <button onclick="triggerUpgrade('growth')" class="w-full bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-400 hover:to-purple-400 text-white text-[11px] font-bold py-2.5 px-4 rounded-lg transition shadow-lg shadow-indigo-500/30 uppercase tracking-wider border border-white/10">
-                    UPGRADE TO GROWTH
-                </button>
-            </div>
-        </div>
+  <!-- HOME / LEADS VIEW -->
+  <div class="view active" id="view-leads">
+    <div class="topbar">
+      <h2>🏠 Home</h2>
+      <div class="topbar-sub">Operational dashboard</div>
     </div>
-
-    <!-- Leads List -->
-    <div id="leads-list-panel" class="w-full md:w-1/3 lg:w-1/4 bg-white border-r border-slate-200 flex flex-col h-full shadow-lg z-10 relative">
-        <div class="p-5 glass-panel border-b border-slate-200 z-10 absolute top-0 w-full">
-            <div class="flex justify-between items-center mb-3">
-                <!-- Hamburger -->
-                <button class="text-slate-400 hover:text-indigo-500 mr-3" onclick="toggleSidebar()">
-                    <i class="fas fa-bars text-xl"></i>
-                </button>
-                <h2 class="text-xl font-bold text-slate-800 tracking-tight hidden md:block">Inbox</h2>
-                <!-- MacroDroid Connection Status -->
-                <div id="gateway-badge" class="flex items-center bg-amber-50 border border-amber-200 px-2.5 py-1 rounded-full shadow-sm cursor-help" title="Gateway Connection Status">
-                    <div id="gateway-dot" class="w-2 h-2 bg-amber-500 rounded-full animate-pulse mr-2"></div>
-                    <span id="gateway-text" class="text-[9px] text-amber-700 font-extrabold uppercase tracking-widest">Connecting...</span>
-                </div>
-            </div>
-            <div class="relative shadow-sm">
-                <i class="fas fa-search absolute left-3 top-3 text-slate-400 text-sm"></i>
-                <input type="text" placeholder="Search missed calls..." class="w-full bg-slate-50 border border-slate-200 text-sm rounded-xl pl-10 pr-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:bg-white transition">
-            </div>
-        </div>
-        <div id="leads-list" class="flex-1 overflow-y-auto scrollbar-hide bg-slate-50/50 pt-[120px]">
-            <div class="p-8 text-center text-slate-400">Loading leads...</div>
-        </div>
+    <div class="search-box">
+      <i class="fas fa-search"></i>
+      <input type="text" placeholder="Search by phone..." oninput="filterLeads(this.value)" inputmode="tel">
     </div>
+    <div class="card-list" id="leads-list"></div>
+  </div>
 
-    <!-- Main Chat Window -->
-    <div class="hidden flex-1 flex-col h-full relative bg-slate-50" id="chat-container">
-        
-        <!-- Chat Header -->
-        <div class="p-4 md:p-5 glass-panel border-b border-slate-200 flex items-center justify-between z-20 absolute w-full top-0">
-            <div class="flex items-center overflow-hidden mr-2">
-                <button class="md:hidden mr-3 text-slate-400 hover:text-indigo-500 flex-shrink-0" onclick="closeMobileChat()">
-                    <i class="fas fa-arrow-left text-lg"></i>
-                </button>
-                <div class="w-10 h-10 md:w-12 md:h-12 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-full flex items-center justify-center text-indigo-600 font-bold text-lg md:text-xl mr-3 shadow-sm border border-white flex-shrink-0" id="chat-avatar">
-                    <i class="fas fa-user"></i>
-                </div>
-                <div class="min-w-0">
-                    <h2 class="text-base md:text-lg font-bold text-slate-800 tracking-tight truncate" id="chat-title">Select a Lead</h2>
-                    <p class="text-[10px] md:text-xs text-slate-500 font-medium truncate hidden sm:block" id="chat-subtitle">View your AI's conversation history</p>
-                </div>
-            </div>
-            
-            <button class="flex items-center bg-white text-rose-500 px-2.5 py-1.5 md:px-4 md:py-2 rounded-xl text-[10px] md:text-xs font-bold border border-rose-100 shadow-sm hover:shadow-md hover:border-rose-300 transition group flex-shrink-0" onclick="alert('Growth Feature: Pause AI and Takeover Chat manually!')">
-                <div class="w-5 h-5 md:w-6 md:h-6 rounded-full bg-rose-50 flex items-center justify-center mr-1 md:mr-2 group-hover:bg-rose-100 transition"><i class="fas fa-hand-paper text-rose-500 text-[10px] md:text-xs"></i></div>
-                <span class="hidden md:inline">Pause AI & Takeover</span>
-                <span class="md:hidden">Takeover</span>
-            </button>
-        </div>
-
-        <!-- Background Graphic -->
-        <div class="absolute inset-0 z-0 opacity-[0.03] pointer-events-none" style="background-image: radial-gradient(#4f46e5 1px, transparent 1px); background-size: 20px 20px;"></div>
-
-        <!-- Chat Messages -->
-        <div id="chat-messages" class="flex-1 overflow-y-auto p-6 space-y-6 pt-[100px] pb-[100px] z-10">
-            <div class="flex items-center justify-center h-full text-slate-400">
-                <div class="text-center bg-white p-8 rounded-2xl shadow-sm border border-slate-100">
-                    <div class="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4 border border-slate-100">
-                        <i class="fas fa-comments text-2xl text-indigo-300"></i>
-                    </div>
-                    <h3 class="text-lg font-bold text-slate-700 mb-1">No Lead Selected</h3>
-                    <p class="text-sm">Click on a lead from the inbox to view chat history.</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Premium Feature: Manual Reply Box (Locked) -->
-        <div class="absolute bottom-0 w-full p-5 glass-panel border-t border-slate-200 z-10">
-            <div class="flex items-center bg-white shadow-sm rounded-full px-5 py-3 border border-slate-200 focus-within:ring-2 focus-within:ring-indigo-400 focus-within:border-transparent transition">
-                <div class="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center mr-3 hover:bg-slate-100 cursor-pointer transition border border-slate-100" onclick="alert('Growth Feature: Attach Documents')">
-                    <i class="fas fa-paperclip text-slate-400 text-sm"></i>
-                </div>
-                <input type="text" placeholder="Upgrade to Growth Plan to type manual replies here..." disabled class="flex-1 bg-transparent font-medium focus:outline-none text-sm text-slate-400 cursor-not-allowed">
-                <div class="bg-slate-200 text-white rounded-full w-10 h-10 flex items-center justify-center ml-2 cursor-not-allowed shadow-inner">
-                    <i class="fas fa-paper-plane text-sm"></i>
-                </div>
-            </div>
-        </div>
+  <!-- CHATS VIEW -->
+  <div class="view" id="view-chats">
+    <div class="topbar">
+      <h2>💬 Chats</h2>
+      <div class="topbar-sub">Active conversations</div>
     </div>
+    <div class="card-list" id="chats-list"></div>
+  </div>
 
-    <!-- Analytics Dashboard (Hidden by default) -->
-    <div class="hidden flex-1 flex-col h-full relative bg-slate-50 overflow-y-auto z-20 w-full absolute top-0 left-0 md:static p-8" id="analytics-container">
-        <div class="flex items-center mb-2">
-            <button class="md:hidden mr-4 text-slate-400 hover:text-indigo-500" onclick="toggleSidebar()">
-                <i class="fas fa-bars text-2xl"></i>
-            </button>
-            <h2 class="text-3xl font-bold text-slate-800 tracking-tight">Performance Analytics</h2>
-        </div>
-        <p class="text-slate-500 mb-8">Measure exactly how much money your AI is saving you.</p>
-        
-        <!-- Key Metrics -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center">
-                <div class="w-14 h-14 bg-indigo-50 rounded-xl flex items-center justify-center mr-4"><i class="fas fa-phone-slash text-2xl text-indigo-500"></i></div>
-                <div>
-                    <p class="text-xs text-slate-400 font-bold uppercase tracking-wider">Total Leads Caught</p>
-                    <p class="text-2xl font-bold text-slate-800" id="stat-total">...</p>
-                </div>
-            </div>
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center">
-                <div class="w-14 h-14 bg-emerald-50 rounded-xl flex items-center justify-center mr-4"><i class="fas fa-check-double text-2xl text-emerald-500"></i></div>
-                <div>
-                    <p class="text-xs text-slate-400 font-bold uppercase tracking-wider">Fully Qualified</p>
-                    <p class="text-2xl font-bold text-slate-800" id="stat-qualified">...</p>
-                </div>
-            </div>
-            <div class="bg-gradient-to-br from-indigo-500 to-purple-600 p-6 rounded-2xl shadow-lg border border-indigo-400 flex items-center text-white relative group">
-                <div class="w-14 h-14 bg-white/20 rounded-xl flex items-center justify-center mr-4"><i class="fas fa-money-bill-wave text-2xl"></i></div>
-                <div>
-                    <div class="flex items-center">
-                        <p class="text-xs text-indigo-200 font-bold uppercase tracking-wider mr-2">Pipeline Value Generated</p>
-                        <button onclick="promptEditLeadValue()" class="text-indigo-200 hover:text-white transition"><i class="fas fa-cog text-xs"></i></button>
-                    </div>
-                    <p class="text-3xl font-bold" id="stat-roi">...</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Charts -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-                <h3 class="text-sm font-bold text-slate-700 mb-4 uppercase tracking-widest">Lead Drop-Off Analysis</h3>
-                <canvas id="dropoffChart" height="200"></canvas>
-            </div>
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-                <h3 class="text-sm font-bold text-slate-700 mb-4 uppercase tracking-widest">Missed Calls (Last 7 Days)</h3>
-                <canvas id="heatmapChart" height="200"></canvas>
-            </div>
-        </div>
+  <!-- BOOKINGS VIEW -->
+  <div class="view" id="view-bookings">
+    <div class="topbar">
+      <h2>📅 Bookings</h2>
+      <div class="topbar-sub">Travel booking details</div>
     </div>
-    </div> <!-- End Dashboard Wrapper -->
+    <!-- Doctor Export Buttons (shown only for doctor flow) -->
+    <div id="doctor-export-bar" style="display:none;padding:0 16px 8px;flex-shrink:0">
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn-action btn-confirm" onclick="exportDoctorCSV('patients')" style="flex:1;min-width:80px"><i class="fas fa-users" style="margin-right:4px"></i>Patients</button>
+        <button class="btn-action btn-pending" onclick="exportDoctorCSV('appointments')" style="flex:1;min-width:80px"><i class="fas fa-calendar" style="margin-right:4px"></i>Appts</button>
+        <button class="btn-action btn-note" onclick="exportDoctorCSV('records')" style="flex:1;min-width:80px"><i class="fas fa-file-medical" style="margin-right:4px"></i>Records</button>
+      </div>
+    </div>
+    <!-- Appointment Filters (shown for doctor flow) -->
+    <div id="doctor-appt-filters" style="display:none;padding:0 16px 8px;flex-shrink:0">
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <input type="date" id="appt-date-filter" onchange="filterAppointments()" style="flex:1;padding:8px 12px;border-radius:10px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-family:inherit;font-size:13px">
+        <select id="appt-status-filter" onchange="filterAppointments()" style="flex:1;padding:8px 12px;border-radius:10px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-family:inherit;font-size:13px">
+          <option value="">All Status</option>
+          <option value="PENDING">Pending</option>
+          <option value="CONFIRMED">Confirmed</option>
+          <option value="ARRIVED">Arrived</option>
+          <option value="COMPLETED">Completed</option>
+          <option value="CANCELLED">Cancelled</option>
+          <option value="NO_SHOW">No-show</option>
+        </select>
+      </div>
+    </div>
+    <div class="card-list" id="bookings-list"></div>
+  </div>
 
-    <script>
-        // Global State
-        let authToken = localStorage.getItem('cortexia_token');
-        let BUSINESS_ID = parseInt(localStorage.getItem('cortexia_business_id')) || 1; 
-        let currentView = 'inbox'; // 'inbox' or 'analytics'
-        let currentLeadId = null;
-        let chartInstance1, chartInstance2;
-        let loopsStarted = false;
+  <!-- VEHICLES VIEW -->
+  <div class="view" id="view-vehicles">
+    <div class="topbar">
+      <h2>🚌 Vehicles</h2>
+      <div class="topbar-sub">Fleet overview</div>
+    </div>
+    <div class="card-list" id="vehicles-list"></div>
+  </div>
 
-        // Initialization
-        document.addEventListener('DOMContentLoaded', () => {
-            if (authToken) {
-                showDashboard();
-                fetchLeads();
-                startDataLoops(); 
-            } else {
-                // Attach event listener safely for mobile compatibility
-                const loginForm = document.getElementById('login-form');
-                if (loginForm) {
-                    loginForm.addEventListener('submit', function(e) {
-                        e.preventDefault();
-                        handleLogin();
-                    });
-                }
-            }
-        });
+  <!-- NOTIFICATIONS VIEW -->
+  <div class="view" id="view-notifications">
+    <div class="topbar">
+      <h2>🔔 Activity</h2>
+      <div class="topbar-sub">Recent lead activity</div>
+    </div>
+    <div class="card-list" id="notif-list"></div>
+  </div>
 
-        async function handleLogin() {
-            const email = document.getElementById('login-email').value.trim().toLowerCase();
-            const password = document.getElementById('login-password').value;
-            
-            try {
-                const res = await fetch('/api/v1/auth/login', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, password })
-                });
-                
-                const data = await res.json();
-                if (res.ok && data.token) {
-                    authToken = data.token;
-                    localStorage.setItem('cortexia_token', authToken);
-                    // Decode token to get business ID (For MVP, we just assume 1 if not present)
-                    BUSINESS_ID = parseInt(data.user.business_id) || 1;
-                    localStorage.setItem('cortexia_business_id', BUSINESS_ID);
-                    
-                    showDashboard();
-                    startDataLoops();
-                } else {
-                    document.getElementById('login-error').classList.remove('hidden');
-                    document.getElementById('login-error').innerText = data.error || 'Login Failed. Status: ' + res.status;
-                }
-            } catch (err) {
-                document.getElementById('login-error').classList.remove('hidden');
-                document.getElementById('login-error').innerText = 'Server Error: ' + err.message;
-            }
-        }
+  <!-- PROFILE VIEW -->
+  <div class="view" id="view-profile">
+    <div class="topbar">
+      <h2>👤 Profile</h2>
+      <div class="topbar-sub">Business settings</div>
+    </div>
+    <div class="card-list">
+      <div class="profile-card">
+        <h3>📊 Overview</h3>
+        <div class="profile-row"><span>Total Leads</span><span id="profile-leads">—</span></div>
+        <div class="profile-row"><span>Qualified</span><span id="profile-qualified">—</span></div>
+        <div class="profile-row clickable" onclick="openPipelineModal()"><span>Pipeline Value</span><span id="profile-value">—</span><i class="fas fa-pen" style="font-size:11px;color:var(--primary-light);margin-left:8px"></i></div>
+        <div class="profile-row"><span>Gateway</span><span id="profile-gateway">—</span></div>
+      </div>
+      <div class="profile-card">
+        <h3>📨 Message Quota</h3>
+        <div class="profile-row"><span>Used</span><span id="profile-quota">—</span></div>
+        <div class="quota-bar"><div class="quota-fill" id="quota-fill" style="width:0%"></div></div>
+      </div>
+      <div class="profile-card" id="team-card" style="display:none">
+        <h3><i class="fas fa-users" style="margin-right:8px;color:var(--primary-light)"></i>Team</h3>
+        <div id="team-list" style="margin-bottom:12px">
+          <div class="loading-center"><div class="spinner"></div></div>
+        </div>
+        <button class="btn-action btn-confirm" id="invite-btn" onclick="openInviteModal()" style="width:100%">
+          <i class="fas fa-user-plus" style="margin-right:6px"></i>Invite Member
+        </button>
+      </div>
+      <div class="profile-card" id="gcal-card" style="display:none">
+        <h3><i class="fab fa-google" style="margin-right:8px;color:#4285F4"></i>Google Calendar</h3>
+        <div id="gcal-status">
+          <div class="loading-center"><div class="spinner"></div></div>
+        </div>
+      </div>
+      <!-- Google Calendar Integration Card -->
+      <div class="profile-card" id="gcal-card" style="display:none">
+        <h3><i class="fas fa-calendar-alt" style="margin-right:8px;color:#4285F4"></i>Google Calendar</h3>
+        <div id="gcal-connected-view" style="display:none">
+          <div class="profile-row">
+            <span>Connected As</span>
+            <span id="gcal-email" style="color:var(--success);font-size:12px;font-weight:600"></span>
+          </div>
+          <div class="profile-row">
+            <span>Auto-sync</span>
+            <span style="color:var(--success);font-weight:600">✅ Active</span>
+          </div>
+          <button class="btn-action" onclick="gcalDisconnect()" style="width:100%;margin-top:10px;background:rgba(239,68,68,.12);color:#EF4444;border:1px solid rgba(239,68,68,.2)">
+            <i class="fas fa-unlink" style="margin-right:6px"></i>Disconnect Calendar
+          </button>
+        </div>
+        <div id="gcal-disconnected-view">
+          <div style="font-size:13px;color:var(--text-muted);margin-bottom:14px;line-height:1.6">
+            Automatically sync patient appointments to your Google Calendar. Get reminders 30 minutes and 2 hours before each visit.
+          </div>
+          <button class="btn-action btn-confirm" onclick="gcalConnect()" style="width:100%" id="gcal-connect-btn">
+            <i class="fab fa-google" style="margin-right:8px"></i>Connect Google Calendar
+          </button>
+        </div>
+      </div>
+      <div class="profile-card">
+        <div class="profile-row"><span>Your Role</span><span id="profile-role" class="role-badge">—</span></div>
+      </div>
+      <button class="btn-logout" onclick="logout()"><i class="fas fa-sign-out-alt" style="margin-right:8px"></i>Logout</button>
+    </div>
+  </div>
+  <!-- PATIENTS VIEW (Doctor module) -->
+  <div class="view" id="view-patients" style="display:none">
+    <div class="topbar">
+      <h2>🏥 Patients</h2>
+      <div class="topbar-sub">Patient health profiles</div>
+    </div>
+    <div class="search-box">
+      <i class="fas fa-search"></i>
+      <input type="text" placeholder="Search patients..." oninput="filterPatients(this.value)" inputmode="text">
+    </div>
+    <div class="card-list" id="patients-list"></div>
+  </div>
 
-        function showDashboard() {
-            document.getElementById('login-wrapper').classList.add('hidden');
-            document.getElementById('dashboard-wrapper').classList.remove('hidden');
-            document.getElementById('dashboard-wrapper').classList.add('flex');
-            
-            // Explicitly default to inbox view so chat-container becomes visible on desktop
-            showView('inbox');
-        }
+  <!-- BOTTOM NAV -->
+  <nav class="bottom-nav">
+    <button class="nav-tab active" id="tab-leads" onclick="switchTab('leads')">
+      <i class="fas fa-home"></i><span>Home</span>
+      <span class="nav-badge" id="leads-badge" style="display:none">0</span>
+    </button>
+    <button class="nav-tab" id="tab-chats" onclick="switchTab('chats')"><i class="fas fa-comments"></i><span>Chats</span></button>
+    <button class="nav-tab" id="tab-bookings" onclick="switchTab('bookings')"><i class="fas fa-calendar-check"></i><span>Bookings</span></button>
+    <button class="nav-tab" id="tab-notifications" onclick="switchTab('notifications')" style="position:relative">
+      <i class="fas fa-bell"></i><span>Alerts</span>
+      <span class="nav-badge" id="notif-badge" style="display:none">0</span>
+    </button>
+    <button class="nav-tab" id="tab-vehicles" onclick="switchTab('vehicles')" style="display:none"><i class="fas fa-bus"></i><span>Fleet</span></button>
+    <button class="nav-tab" id="tab-patients" onclick="switchTab('patients')" style="display:none"><i class="fas fa-stethoscope"></i><span>Patients</span></button>
+    <button class="nav-tab" id="tab-profile" onclick="switchTab('profile')"><i class="fas fa-user"></i><span>Profile</span></button>
+  </nav>
+</div>
 
-        function logout() {
-            localStorage.removeItem('cortexia_token');
-            localStorage.removeItem('cortexia_business_id');
-            authToken = null;
-            loopsStarted = false; // Reset so re-login can start polling again
-            document.getElementById('dashboard-wrapper').classList.add('hidden');
-            document.getElementById('dashboard-wrapper').classList.remove('flex');
-            document.getElementById('login-wrapper').classList.remove('hidden');
-            document.getElementById('login-error').classList.remove('hidden');
-            document.getElementById('login-error').innerText = "Session expired. Please login again.";
-        }
+<!-- ═══════════════════════════════════════════ -->
+<!-- DEDICATED PAGES (slide-in from sidebar)    -->
+<!-- ═══════════════════════════════════════════ -->
 
+<!-- ANALYTICS PAGE -->
+<div class="page-screen" id="page-analytics" style="display:none">
+  <div class="page-header">
+    <button class="chat-back" onclick="closePage('analytics')"><i class="fas fa-arrow-left"></i></button>
+    <h3>📊 Analytics</h3>
+  </div>
+  <div class="page-body" id="analytics-body">
+    <div class="loading-center"><div class="spinner"></div><span>Loading analytics...</span></div>
+  </div>
+</div>
 
-        function showView(view) {
-            currentView = view;
-            const leadsListPanel = document.getElementById('leads-list-panel');
-            
-            // Auto-close sidebar on mobile
-            if (window.innerWidth < 768) {
-                const sidebar = document.getElementById('sidebar');
-                sidebar.style.transform = 'translateX(-100%)';
-            }
-            
-            // Toggle Views
-            if (view === 'inbox') {
-                leadsListPanel.classList.remove('hidden');
-                
-                if (window.innerWidth >= 768) {
-                    document.getElementById('chat-container').classList.remove('hidden');
-                    document.getElementById('chat-container').classList.add('flex');
-                } else {
-                    document.getElementById('chat-container').classList.add('hidden');
-                    document.getElementById('chat-container').classList.remove('flex');
-                }
-                
-                document.getElementById('analytics-container').classList.add('hidden');
-                document.getElementById('analytics-container').classList.remove('flex');
-                
-                document.getElementById('nav-inbox').classList.add('bg-gradient-to-r', 'from-indigo-500/20', 'border-l-4', 'border-cyan-400', 'text-white');
-                document.getElementById('nav-inbox').classList.remove('text-slate-300');
-                
-                document.getElementById('nav-analytics').classList.remove('bg-gradient-to-r', 'from-indigo-500/20', 'border-l-4', 'border-cyan-400', 'text-white');
-                document.getElementById('nav-analytics').classList.add('text-slate-300');
-            } else {
-                leadsListPanel.classList.add('hidden');
-                document.getElementById('chat-container').classList.add('hidden');
-                document.getElementById('chat-container').classList.remove('flex');
-                document.getElementById('analytics-container').classList.remove('hidden');
-                document.getElementById('analytics-container').classList.add('flex');
-                
-                document.getElementById('nav-analytics').classList.add('bg-gradient-to-r', 'from-indigo-500/20', 'border-l-4', 'border-cyan-400', 'text-white');
-                document.getElementById('nav-analytics').classList.remove('text-slate-300');
-                
-                document.getElementById('nav-inbox').classList.remove('bg-gradient-to-r', 'from-indigo-500/20', 'border-l-4', 'border-cyan-400', 'text-white');
-                document.getElementById('nav-inbox').classList.add('text-slate-300');
-                
-                loadAnalytics();
-            }
-        }
+<!-- PRICING PAGE -->
+<div class="page-screen" id="page-pricing" style="display:none">
+  <div class="page-header">
+    <button class="chat-back" onclick="closePage('pricing')"><i class="fas fa-arrow-left"></i></button>
+    <h3>👑 Plans & Pricing</h3>
+  </div>
+  <div class="page-body">
+    <!-- Starter -->
+    <div class="pricing-card">
+      <div class="pricing-badge starter">STARTER</div>
+      <div class="pricing-price">₹999<span>/month</span></div>
+      <ul class="pricing-features">
+        <li><i class="fas fa-check"></i> 500 AI messages/month</li>
+        <li><i class="fas fa-check"></i> 1 WhatsApp number</li>
+        <li><i class="fas fa-check"></i> Lead capture & recovery</li>
+        <li><i class="fas fa-check"></i> AI conversation flow</li>
+        <li><i class="fas fa-check"></i> Mobile dashboard</li>
+        <li><i class="fas fa-check"></i> Email notifications</li>
+      </ul>
+      <button class="pricing-cta" onclick="window.open('https://wa.me/917741894909?text=I%20want%20the%20Starter%20plan')">Get Started</button>
+    </div>
+    <!-- Growth -->
+    <div class="pricing-card featured">
+      <div class="pricing-popular">⭐ MOST POPULAR</div>
+      <div class="pricing-badge growth">GROWTH</div>
+      <div class="pricing-price">₹2,499<span>/month</span></div>
+      <ul class="pricing-features">
+        <li><i class="fas fa-check"></i> 2,000 AI messages/month</li>
+        <li><i class="fas fa-check"></i> Priority support</li>
+        <li><i class="fas fa-check"></i> Advanced analytics</li>
+        <li><i class="fas fa-check"></i> Booking workflows</li>
+        <li><i class="fas fa-check"></i> Media messages</li>
+        <li><i class="fas fa-check"></i> Operator takeover</li>
+        <li><i class="fas fa-check"></i> Custom follow-ups</li>
+      </ul>
+      <button class="pricing-cta featured" onclick="window.open('https://wa.me/917741894909?text=I%20want%20the%20Growth%20plan')">Upgrade Now</button>
+    </div>
+    <!-- Custom -->
+    <div class="pricing-card">
+      <div class="pricing-badge custom">CUSTOM</div>
+      <div class="pricing-price">Custom<span></span></div>
+      <ul class="pricing-features">
+        <li><i class="fas fa-check"></i> Unlimited AI messages</li>
+        <li><i class="fas fa-check"></i> Multiple WhatsApp numbers</li>
+        <li><i class="fas fa-check"></i> Dedicated account manager</li>
+        <li><i class="fas fa-check"></i> White-label options</li>
+        <li><i class="fas fa-check"></i> API access</li>
+        <li><i class="fas fa-check"></i> SLA guarantee</li>
+      </ul>
+      <button class="pricing-cta" onclick="window.open('https://wa.me/917741894909?text=I%20need%20a%20custom%20plan')">Contact Sales</button>
+    </div>
+  </div>
+</div>
 
-        async function loadAnalytics() {
-            try {
-                const res = await fetch(`/api/businesses/${BUSINESS_ID}/analytics?t=${Date.now()}`, {
-                    headers: { 'Authorization': `Bearer ${authToken}` }
-                });
-                if (res.status === 401 || res.status === 403) {
-                    console.error("loadAnalytics failed Auth:", res.status);
-                    return logout();
-                }
-                const data = await res.json();
-                
-                document.getElementById('stat-total').textContent = data.totalLeads;
-                document.getElementById('stat-qualified').textContent = data.qualifiedLeads;
-                document.getElementById('stat-roi').textContent = '₹' + data.pipelineValue.toLocaleString('en-IN');
-                
-                // Update Sidebar
-                document.getElementById('sidebar-stat-revenue').innerHTML = '₹' + (data.pipelineValue/100000).toFixed(1) + 'L <i class="fas fa-arrow-trend-up text-xs text-green-400"></i>';
-                document.getElementById('sidebar-stat-leads').textContent = data.qualifiedLeads;
+<!-- SUPPORT PAGE -->
+<div class="page-screen" id="page-support" style="display:none">
+  <div class="page-header">
+    <button class="chat-back" onclick="closePage('support')"><i class="fas fa-arrow-left"></i></button>
+    <h3>🛟 Support</h3>
+  </div>
+  <div class="page-body">
+    <div class="support-hero">
+      <i class="fas fa-headset"></i>
+      <h3>How can we help?</h3>
+      <p>Our team is ready to assist you</p>
+    </div>
+    <a class="support-card" href="https://wa.me/917741894909?text=Hi%20Cortexia%20Support%2C%20I%20need%20help" target="_blank">
+      <div class="support-icon" style="background:rgba(37,211,102,.15)"><i class="fab fa-whatsapp" style="color:#25d366"></i></div>
+      <div class="support-info">
+        <h4>WhatsApp Support</h4>
+        <p>Fastest response · Usually within minutes</p>
+      </div>
+      <i class="fas fa-chevron-right" style="color:var(--text-muted)"></i>
+    </a>
+    <a class="support-card" href="mailto:support@cortexia.shop">
+      <div class="support-icon" style="background:rgba(79,70,229,.15)"><i class="fas fa-envelope" style="color:var(--primary-light)"></i></div>
+      <div class="support-info">
+        <h4>Email Support</h4>
+        <p>support@cortexia.shop</p>
+      </div>
+      <i class="fas fa-chevron-right" style="color:var(--text-muted)"></i>
+    </a>
+    <a class="support-card" href="tel:+917741894909">
+      <div class="support-icon" style="background:rgba(16,185,129,.15)"><i class="fas fa-phone" style="color:var(--success)"></i></div>
+      <div class="support-info">
+        <h4>Call Us</h4>
+        <p>+91 77418 94909</p>
+      </div>
+      <i class="fas fa-chevron-right" style="color:var(--text-muted)"></i>
+    </a>
+    <div class="support-hours">
+      <i class="fas fa-clock" style="margin-right:6px"></i>Support hours: Mon–Sat, 9 AM – 8 PM IST
+    </div>
+  </div>
+</div>
+<!-- PATIENT PROFILE PAGE (Doctor module) -->
+<div class="page-screen" id="page-patient-profile" style="display:none">
+  <div class="page-header" style="flex-direction:column;align-items:stretch;padding-bottom:0">
+    <div style="display:flex;align-items:center;gap:10px">
+      <button class="chat-back" onclick="closePage('patient-profile')"><i class="fas fa-arrow-left"></i></button>
+      <h3 id="pp-title">Patient</h3>
+    </div>
+    <div id="pp-header-meta" style="display:flex;align-items:center;gap:8px;padding:6px 0 10px 42px;font-size:13px;color:var(--text-muted)">
+      <span id="pp-phone"></span>
+      <span id="pp-status" class="status-chip new" style="font-size:11px"></span>
+    </div>
+  </div>
+  <div class="page-body" id="pp-body" style="padding:0 12px 24px">
+    <div class="loading-center"><div class="spinner"></div><span>Loading patient...</span></div>
+  </div>
+</div>
+<!-- VEHICLE DETAIL PAGE -->
+<div class="page-screen" id="page-vehicle-detail" style="display:none">
+  <div class="page-header">
+    <button class="chat-back" onclick="closePage('vehicle-detail')"><i class="fas fa-arrow-left"></i></button>
+    <h3 id="vd-title">Vehicle</h3>
+  </div>
+  <div class="page-body" id="vd-body">
+    <div class="loading-center"><div class="spinner"></div><span>Loading...</span></div>
+  </div>
+</div>
 
-                // Message Quota
-                document.getElementById('sidebar-quota-text').textContent = data.aiMessageCount + '/500';
-                document.getElementById('sidebar-quota-bar').style.width = Math.min((data.aiMessageCount / 500) * 100, 100) + '%';
-                
-                renderCharts(data);
-            } catch (err) {
-                console.error("Analytics Error", err);
-            }
-        }
+<!-- VEHICLE EDIT MODAL -->
+<div class="modal-overlay" id="vehicle-edit-modal" style="display:none" onclick="if(event.target===this)closeVehicleEdit()">
+  <div class="modal-card" style="max-height:85vh;overflow-y:auto">
+    <h3 style="margin-bottom:14px"><i class="fas fa-edit" style="margin-right:8px;color:var(--primary-light)"></i>Edit Vehicle</h3>
+    <label class="modal-label">Vehicle Name</label>
+    <input class="modal-input" id="ve-name" placeholder="e.g. Non AC 17 Seater">
+    <label class="modal-label">Price per KM (₹)</label>
+    <input class="modal-input" id="ve-rate" type="number" placeholder="23">
+    <label class="modal-label">Seat Count</label>
+    <input class="modal-input" id="ve-seats" type="number" placeholder="17">
+    <label class="modal-label">Features (comma separated)</label>
+    <textarea class="modal-input" id="ve-features" rows="4" placeholder="Pushback seats, WiFi, Dolby..."></textarea>
+    <label class="modal-label">Notes (comma separated)</label>
+    <textarea class="modal-input" id="ve-notes" rows="2" placeholder="Toll extra, Parking extra..."></textarea>
+    <div style="display:flex;gap:10px;margin-top:16px">
+      <button class="vd-btn-primary" id="ve-save-btn" onclick="saveVehicleEdit()" style="flex:1"><i class="fas fa-save" style="margin-right:6px"></i>Save</button>
+      <button class="vd-btn-secondary" onclick="closeVehicleEdit()" style="flex:1">Cancel</button>
+    </div>
+  </div>
+</div>
 
-        function toggleSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            // Check if it's currently hidden by looking at the inline style or classes
-            const isHidden = sidebar.style.transform === 'translateX(-100%)' || 
-                             (!sidebar.style.transform && sidebar.classList.contains('-translate-x-full') && window.innerWidth < 768);
-            
-            if (isHidden) {
-                sidebar.style.transform = 'translateX(0)';
-            } else {
-                sidebar.style.transform = 'translateX(-100%)';
-            }
-        }
+<!-- FULL-SCREEN CHAT -->
+<div class="chat-screen" id="chat-screen" style="display:none">
+  <div class="chat-header">
+    <button class="chat-back" onclick="closeChat()" aria-label="Back"><i class="fas fa-arrow-left"></i></button>
+    <div class="lead-avatar" style="width:38px;height:38px;font-size:14px">AI</div>
+    <div class="chat-header-info">
+      <h3 id="chat-title">—</h3>
+      <span id="chat-status">—</span>
+    </div>
+  </div>
+  <div class="takeover-bar" id="takeover-bar">
+    <button class="takeover-btn pause" id="btn-pause" onclick="pauseLead()"><i class="fas fa-pause"></i> Pause AI</button>
+    <button class="takeover-btn resume" id="btn-resume" onclick="resumeLead()" style="display:none"><i class="fas fa-play"></i> Resume AI</button>
+  </div>
+  <div class="chat-messages" id="chat-messages"></div>
+  <div class="media-preview" id="media-preview">
+    <img id="media-thumb" src="" alt="preview" style="display:none">
+    <div class="file-info">
+      <div class="file-name" id="media-name">—</div>
+      <div class="file-size" id="media-size">—</div>
+    </div>
+    <button class="remove-media" onclick="removeMedia()"><i class="fas fa-times-circle"></i></button>
+  </div>
+  <div class="chat-input-bar" id="chat-input-bar">
+    <button class="attach-btn" onclick="document.getElementById('file-input').click()" aria-label="Attach"><i class="fas fa-paperclip"></i></button>
+    <input type="file" id="file-input" accept="image/*,video/*,.pdf,.doc,.docx" style="display:none" onchange="handleFileSelect(event)">
+    <textarea id="chat-textarea" placeholder="Type a message..." rows="1" oninput="autoResizeTextarea(this)"></textarea>
+    <button class="send-btn" id="send-btn" onclick="sendManualMessage()" aria-label="Send"><i class="fas fa-paper-plane"></i></button>
+  </div>
+</div>
 
-        function closeMobileChat() {
-            currentLeadId = null; // Clear active chat to stop background polling
-            const chatContainer = document.getElementById('chat-container');
-            
-            chatContainer.classList.add('hidden');
-            // Remove mobile-specific full-screen override classes, but DO NOT remove h-full as it is a base class!
-            chatContainer.classList.remove('flex', 'absolute', 'w-full', 'z-40');
-            
-            document.getElementById('leads-list-panel').classList.remove('hidden');
+<!-- PIPELINE EDIT MODAL -->
+<div class="modal-overlay" id="pipeline-modal" style="display:none" onclick="closePipelineModal(event)">
+  <div class="modal-card" onclick="event.stopPropagation()">
+    <h3>💰 Edit Pipeline Value</h3>
+    <p>Set the estimated value per qualified lead</p>
+    <div class="modal-input-group">
+      <span class="modal-prefix">₹</span>
+      <input type="number" id="pipeline-input" placeholder="50000" min="0" max="10000000" inputmode="numeric">
+    </div>
+    <div class="modal-actions">
+      <button class="modal-btn cancel" onclick="closePipelineModal()">Cancel</button>
+      <button class="modal-btn save" id="pipeline-save-btn" onclick="savePipelineValue()">Save</button>
+    </div>
+  </div>
+</div>
+<!-- INVITE TEAM MEMBER MODAL -->
+<div class="modal-overlay" id="invite-modal" style="display:none" onclick="if(event.target===this)closeInviteModal()">
+  <div class="modal-card" onclick="event.stopPropagation()">
+    <h3 style="margin-bottom:4px"><i class="fas fa-user-plus" style="margin-right:8px;color:var(--primary-light)"></i>Invite Team Member</h3>
+    <p style="color:var(--text-muted);font-size:13px;margin-bottom:12px">They will get a login account for this business</p>
+    <input class="modal-input" id="invite-email" type="email" placeholder="Email address" style="margin-bottom:8px">
+    <input class="modal-input" id="invite-name" type="text" placeholder="Display name (optional)" style="margin-bottom:8px">
+    <select class="modal-input" id="invite-role" style="margin-bottom:8px">
+      <option value="receptionist">Receptionist</option>
+      <option value="doctor">Doctor</option>
+      <option value="admin">Admin</option>
+    </select>
+    <input class="modal-input" id="invite-password" type="text" placeholder="Temp password (auto-generated if empty)" style="margin-bottom:4px">
+    <div id="invite-result" style="display:none;padding:8px;border-radius:8px;margin-top:8px;font-size:13px"></div>
+    <div style="display:flex;gap:10px;margin-top:14px">
+      <button class="modal-btn cancel" onclick="closeInviteModal()">Cancel</button>
+      <button class="modal-btn save" id="invite-save-btn" onclick="submitInvite()">Invite</button>
+    </div>
+  </div>
+</div>
 
-            // Show analytics if we were on the analytics view
-            if (currentView === 'analytics') {
-                document.getElementById('analytics-container').classList.remove('hidden');
-                document.getElementById('analytics-container').classList.add('flex');
-                document.getElementById('leads-list-panel').classList.add('hidden');
-            }
-        }
+<!-- NOTES MODAL -->
+<div class="modal-overlay" id="notes-modal" style="display:none" onclick="if(event.target===this)closeNotesModal()">
+  <div class="modal-card" onclick="event.stopPropagation()">
+    <h3 style="margin-bottom:4px"><i class="fas fa-sticky-note" style="margin-right:8px;color:var(--primary-light)"></i>Appointment Notes</h3>
+    <p>Add an internal note for this appointment</p>
+    <textarea class="modal-input" id="notes-input" rows="4" placeholder="Type notes here..."></textarea>
+    <div style="display:flex;gap:10px;margin-top:14px">
+      <button class="modal-btn cancel" onclick="closeNotesModal()">Cancel</button>
+      <button class="modal-btn save" id="notes-save-btn" onclick="saveNotesModal()">Save Note</button>
+    </div>
+  </div>
+</div>
 
-        async function checkGatewayStatus() {
-            try {
-                const res = await fetch(`/api/businesses/${BUSINESS_ID}/gateway-status?t=${Date.now()}`, {
-                    headers: { 'Authorization': `Bearer ${authToken}` }
-                });
-                if (res.status === 401 || res.status === 403) return logout();
-                const data = await res.json();
-                const badge = document.getElementById('gateway-badge');
-                const dot = document.getElementById('gateway-dot');
-                const text = document.getElementById('gateway-text');
-
-                if (data.status === 'ONLINE') {
-                    badge.className = 'flex items-center bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-full shadow-sm cursor-help';
-                    dot.className = 'w-2 h-2 bg-emerald-500 rounded-full animate-pulse mr-2 shadow-[0_0_8px_rgba(16,185,129,0.8)]';
-                    text.className = 'text-[9px] text-emerald-700 font-extrabold uppercase tracking-widest';
-                    text.innerText = 'Gateway Online';
-                } else {
-                    badge.className = 'flex items-center bg-rose-50 border border-rose-200 px-2.5 py-1 rounded-full shadow-sm cursor-help';
-                    dot.className = 'w-2 h-2 bg-rose-500 rounded-full mr-2';
-                    text.className = 'text-[9px] text-rose-700 font-extrabold uppercase tracking-widest';
-                    text.innerText = 'Gateway Offline';
-                }
-            } catch (err) {
-                // Ignore silent fail
-            }
-        }
-
-        function renderCharts(data) {
-            const ctx1 = document.getElementById('dropoffChart').getContext('2d');
-            if (chartInstance1) chartInstance1.destroy();
-            chartInstance1 = new Chart(ctx1, {
-                type: 'doughnut',
-                data: {
-                    labels: Object.keys(data.dropOffs),
-                    datasets: [{
-                        data: Object.values(data.dropOffs),
-                        backgroundColor: ['#ef4444', '#f59e0b', '#3b82f6', '#10b981'],
-                        borderWidth: 0
-                    }]
-                },
-                options: { cutout: '70%', plugins: { legend: { position: 'right' } } }
-            });
-
-            const ctx2 = document.getElementById('heatmapChart').getContext('2d');
-            if (chartInstance2) chartInstance2.destroy();
-            chartInstance2 = new Chart(ctx2, {
-                type: 'bar',
-                data: {
-                    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-                    datasets: [{
-                        label: 'Missed Calls',
-                        data: data.heatmap,
-                        backgroundColor: '#6366f1',
-                        borderRadius: 6
-                    }]
-                },
-                options: { scales: { y: { beginAtZero: true } }, plugins: { legend: { display: false } } }
-            });
-        }
-
-        async function fetchLeads() {
-            try {
-                const res = await fetch(`/api/businesses/${BUSINESS_ID}/leads?t=${Date.now()}`, {
-                    headers: { 'Authorization': `Bearer ${authToken}` }
-                });
-                if (res.status === 401 || res.status === 403) {
-                    console.error("fetchLeads failed Auth:", res.status);
-                    return logout();
-                }
-                const leads = await res.json();
-                renderLeads(leads);
-                
-                // Auto-refresh the currently open chat in the background
-                if (currentLeadId) {
-                    const activeLead = leads.find(l => l.id === currentLeadId);
-                    if (activeLead) {
-                        loadChat(activeLead, true); // true = silent background refresh
-                    }
-                }
-            } catch (err) {
-                console.error('Failed to fetch leads:', err);
-                document.getElementById('leads-list').innerHTML = `<div class="p-4 text-red-500">Error loading leads. Check console.</div>`;
-            }
-        }
-
-        function renderLeads(leads) {
-            const list = document.getElementById('leads-list');
-            list.innerHTML = '';
-
-            if (leads.length === 0) {
-                list.innerHTML = `<div class="p-8 text-center text-gray-500">No leads yet. Give a missed call to start!</div>`;
-                return;
-            }
-
-            leads.forEach(lead => {
-                const safeDateStr = (lead.last_message_at || lead.created_at).replace(' ', 'T');
-                const date = new Date(safeDateStr).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-                let statusColor = lead.status === 'COMPLETED' ? 'bg-emerald-100 text-emerald-700 border-emerald-200' : 'bg-amber-100 text-amber-700 border-amber-200';
-                if (lead.status === 'EXPIRED') statusColor = 'bg-rose-100 text-rose-700 border-rose-200';
-
-                const div = document.createElement('div');
-                div.className = `p-5 border-b border-slate-100 cursor-pointer hover:bg-white transition duration-200 ${currentLeadId === lead.id ? 'bg-white border-l-4 border-indigo-500 shadow-md transform scale-[1.02] z-10 relative' : ''}`;
-                div.onclick = () => loadChat(lead);
-
-                div.innerHTML = `
-                    <div class="flex justify-between items-start mb-2">
-                        <span class="font-bold text-slate-800 tracking-tight">${lead.phone}</span>
-                        <span class="text-[10px] text-slate-400 font-bold">${date}</span>
-                    </div>
-                    <div class="flex justify-between items-center">
-                        <span class="text-[9px] font-extrabold uppercase tracking-widest px-2 py-1 rounded border shadow-sm ${statusColor}">${lead.status}</span>
-                        ${lead.classification ? `<span class="text-[10px] font-extrabold text-orange-500 tracking-wide bg-orange-50 px-2 py-1 rounded border border-orange-100 shadow-sm"><i class="fas fa-fire mr-1"></i>${lead.classification}</span>` : ''}
-                    </div>
-                `;
-                list.appendChild(div);
-            });
-        }
-
-        async function loadChat(lead, isBackground = false) {
-            currentLeadId = lead.id;
-            document.getElementById('chat-title').textContent = lead.phone;
-            document.getElementById('chat-subtitle').innerText = lead.classification ? 'Qualified Lead - Ready to Close' : 'AI Qualification in Progress';
-            
-            // Mobile Routing
-            if (!isBackground && window.innerWidth < 768) {
-                document.getElementById('leads-list-panel').classList.add('hidden');
-                document.getElementById('chat-container').classList.remove('hidden');
-                document.getElementById('chat-container').classList.add('flex', 'absolute', 'w-full', 'h-full', 'z-40');
-            }
-
-
-            const messagesDiv = document.getElementById('chat-messages');
-            if (!isBackground) {
-                messagesDiv.innerHTML = `<div class="text-center text-gray-400 mt-10"><i class="fas fa-spinner fa-spin"></i> Loading messages...</div>`;
-            }
-
-            try {
-                const res = await fetch(`/api/leads/${lead.id}/messages?t=${Date.now()}`, {
-                    headers: { 'Authorization': `Bearer ${authToken}` }
-                });
-                if (res.status === 401 || res.status === 403) return logout();
-                const messages = await res.json();
-                renderMessages(messages);
-            } catch (err) {
-                messagesDiv.innerHTML = `<div class="text-center text-red-500 mt-10">Error loading messages.</div>`;
-            }
-        }
-
-        // XSS prevention: escape HTML entities in user-generated content
-        function sanitize(str) {
-            const d = document.createElement('div');
-            d.textContent = String(str || '');
-            return d.innerHTML;
-        }
-
-        function renderMessages(messages) {
-            const div = document.getElementById('chat-messages');
-            
-            // BUGFIX 2: Detect if user is manually scrolled up before replacing innerHTML
-            const isNearBottom = div.scrollHeight - div.scrollTop - div.clientHeight <= 100;
-            const previousScrollTop = div.scrollTop;
-            
-            div.innerHTML = '';
-
-            if (messages.length === 0) {
-                div.innerHTML = `<div class="text-center text-gray-500 bg-white py-2 px-4 rounded-lg inline-block mx-auto mt-4 shadow-sm text-sm">Chat history is empty.</div>`;
-                return;
-            }
-
-            let lastDate = null;
-
-            messages.forEach(msg => {
-                const isAI = msg.sender === 'AI';
-                const safeDateStr = (msg.created_at || '').replace(' ', 'T');
-                const msgDate = new Date(safeDateStr);
-                const time = msgDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-                const dateStr = msgDate.toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' });
-                
-                // WhatsApp-style Date Separator
-                if (dateStr !== lastDate) {
-                    const dateWrap = document.createElement('div');
-                    dateWrap.className = "flex justify-center my-4";
-                    dateWrap.innerHTML = `<div class="bg-slate-200 text-slate-600 text-[10px] font-bold px-3 py-1 rounded-lg shadow-sm">${dateStr}</div>`;
-                    div.appendChild(dateWrap);
-                    lastDate = dateStr;
-                }
-
-                const msgWrap = document.createElement('div');
-                msgWrap.className = `flex w-full mb-3 ${isAI ? 'justify-end' : 'justify-start'} animate-fade-in-up`; 
-                
-                // WhatsApp Bubble Mechanics with Cortexia Paint
-                const bubble = document.createElement('div');
-                bubble.className = `max-w-[85%] md:max-w-[70%] rounded-xl px-3 py-2 shadow-sm relative ${isAI ? 'bg-gradient-to-br from-indigo-500 to-purple-600 text-white rounded-tr-none' : 'bg-white text-slate-800 rounded-tl-none border border-slate-100'}`;
-                
-                bubble.innerHTML = `
-                    <div class="text-[10px] font-extrabold uppercase tracking-widest mb-1 ${isAI ? 'text-indigo-200' : 'text-indigo-500'}">
-                        ${isAI ? '<i class="fas fa-robot mr-1 text-white"></i> Cortexia AI' : '<i class="fas fa-user mr-1"></i> Customer'}
-                    </div>
-                    <div class="text-[15px] whitespace-pre-wrap leading-snug break-words pb-3">${sanitize(msg.message_text)}</div>
-                    <div class="absolute bottom-1 right-2 flex items-center space-x-1">
-                        <span class="text-[9px] font-bold ${isAI ? 'text-indigo-200' : 'text-slate-400'}">${time}</span>
-                        ${isAI ? '<i class="fas fa-check-double text-[10px] text-cyan-300"></i>' : ''}
-                    </div>
-                `;
-                
-                // WhatsApp Tails
-                const tail = document.createElement('div');
-                tail.className = `absolute top-0 w-3 h-3 ${isAI ? '-right-2 bg-gradient-to-br from-purple-500 to-purple-600' : '-left-2 bg-white border-l border-t border-slate-100'}`;
-                tail.style.clipPath = isAI ? 'polygon(0 0, 100% 0, 0 100%)' : 'polygon(0 0, 100% 0, 100% 100%)';
-                bubble.appendChild(tail);
-
-                msgWrap.appendChild(bubble);
-                div.appendChild(msgWrap);
-            });
-
-            // BUGFIX 2: Smart scrolling implementation
-            if (isNearBottom) {
-                // User was already at bottom, auto-scroll to new message
-                div.scrollTop = div.scrollHeight;
-            } else {
-                // User was scrolled up reading history, maintain their exact position
-                div.scrollTop = previousScrollTop;
-            }
-        }
-
-        // Initialize ONLY if logged in
-        function startDataLoops() {
-            if (loopsStarted || !authToken) return;
-            loopsStarted = true;
-            fetchLeads();
-            loadAnalytics();
-            checkGatewayStatus();
-            // 5-second polling — balances near-real-time feel with Vercel serverless costs
-            setInterval(fetchLeads, 5000);
-            setInterval(checkGatewayStatus, 30000);
-        }
-
-        // startDataLoops is called in DOMContentLoaded
-
-        // ==========================================
-        // RAZORPAY BILLING INTEGRATION (Phase 3)
-        // ==========================================
-        async function triggerUpgrade(planName) {
-            try {
-                // 1. Create Order on Backend
-                const res = await fetch('/api/v1/billing/create-order', {
-                    method: 'POST',
-                    headers: { 
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${authToken}`
-                    },
-                    body: JSON.stringify({ plan: planName })
-                });
-                
-                const orderData = await res.json();
-                
-                if (!res.ok) {
-                    alert("Failed to initialize checkout: " + (orderData.error || 'Unknown error'));
-                    return;
-                }
-
-                // 2. Open Razorpay Checkout overlay
-                const options = {
-                    "key": orderData.key, 
-                    "amount": orderData.amount,
-                    "currency": "INR",
-                    "name": orderData.name,
-                    "description": orderData.description,
-                    "order_id": orderData.order_id,
-                    "handler": function (response) {
-                        // 3. Payment Success Callback
-                        alert(`Payment Successful! Welcome to the ${planName.toUpperCase()} plan! Refreshing your dashboard...`);
-                        location.reload();
-                    },
-                    "prefill": {
-                        "name": "Cortexia Client",
-                        "email": "client@cortexia.shop",
-                        "contact": "9999999999"
-                    },
-                    "theme": {
-                        "color": "#4f46e5" // Indigo-600
-                    }
-                };
-                
-                const rzp = new Razorpay(options);
-                rzp.on('payment.failed', function (response){
-                    alert("Payment Failed. Reason: " + response.error.description);
-                });
-                rzp.open();
-
-            } catch (err) {
-                console.error("Checkout Error:", err);
-                alert("An error occurred while opening the checkout.");
-            }
-        } // <-- Added missing closing brace
-
-        async function promptEditLeadValue() {
-            const newValue = prompt("Enter the estimated revenue value per qualified lead (in ₹):");
-            if (!newValue || isNaN(newValue)) return;
-
-            try {
-                const res = await fetch(`/api/businesses/${BUSINESS_ID}/settings`, {
-                    method: 'PUT',
-                    headers: { 
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${authToken}`
-                    },
-                    body: JSON.stringify({ lead_value: parseInt(newValue) })
-                });
-
-                if (res.ok) {
-                    alert("Lead value updated successfully!");
-                    loadAnalytics(); // Refresh dashboard
-                } else {
-                    alert("Failed to update lead value.");
-                }
-            } catch (err) {
-                console.error(err);
-                alert("Error connecting to server.");
-            }
-        }
-    </script>
+<script src="/mobile.js?v=16"></script>
 </body>
 </html>
