@@ -1556,10 +1556,14 @@ async function loadNotifications() {
       const frag = document.createDocumentFragment();
       data.notifications.forEach(n => {
         const d = document.createElement('div');
-        d.className = 'lead-card' + (n.is_read ? '' : ' notif-unread');
-        const typeIcon = n.type === 'booking' ? 'fa-bus' : n.type === 'confirmed' ? 'fa-check-circle'
+        d.className = 'lead-card' + (n.is_read ? '' : ' notif-unread') + (n.type === 'alert' ? ' notif-alert' : '');
+        var typeIcon = n.type === 'alert' ? 'fa-exclamation-triangle'
+          : n.type === 'reminder' ? 'fa-clock'
+          : n.type === 'booking' ? 'fa-bus' : n.type === 'confirmed' ? 'fa-check-circle'
           : n.type === 'new_lead' ? 'fa-phone' : 'fa-comment';
-        const typeColor = n.type === 'booking' ? '#6366f1' : n.type === 'confirmed' ? '#10b981'
+        var typeColor = n.type === 'alert' ? '#EF4444'
+          : n.type === 'reminder' ? '#8B5CF6'
+          : n.type === 'booking' ? '#6366f1' : n.type === 'confirmed' ? '#10b981'
           : n.type === 'new_lead' ? '#f59e0b' : '#3b82f6';
         d.innerHTML = `<div class="lead-avatar" style="background:${typeColor};font-size:16px"><i class="fas ${typeIcon}"></i></div>
           <div class="lead-info">
