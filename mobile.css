@@ -479,3 +479,15 @@ textarea.modal-input{resize:vertical;min-height:44px}
 /* ── Alert Notifications ─────────────────── */
 .notif-alert{border-left:4px solid #EF4444 !important;background:rgba(239,68,68,.04) !important}
 .notif-unread{border-left:4px solid var(--primary) !important;background:rgba(16,185,129,.04)}
+
+/* ── Desktop Layout Constraint ─────────────── */
+@media (min-width: 640px) {
+  html { background: #0f172a; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+  body { width: 100%; max-width: 420px; height: 90vh; max-height: 900px; min-height: 600px; position: relative; border-radius: 24px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); border: 1px solid var(--border); overflow: hidden; background: var(--bg); }
+  .sidebar, .chat-screen, .page-screen, .modal-overlay { position: absolute; }
+  .login-screen { height: 100%; }
+  .app { height: 100%; }
+  /* Optional: Make scrollbars subtle on desktop */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
+}
