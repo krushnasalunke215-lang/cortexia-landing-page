@@ -16,6 +16,7 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
   <link rel="stylesheet" href="/mobile.css?v=16">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://browser.sentry-cdn.com/7.114.0/bundle.min.js" crossorigin="anonymous"></script>
 </head>
 <body>
 
@@ -135,6 +136,15 @@
       <h2>🚌 Vehicles</h2>
       <div class="topbar-sub">Fleet overview</div>
     </div>
+    <div style="padding:12px 16px 0;flex-shrink:0">
+      <button class="btn-action btn-confirm" id="add-vehicle-btn" onclick="openVehicleForm()" style="width:100%">
+        <i class="fas fa-plus" style="margin-right:6px"></i>Add New Vehicle
+      </button>
+    </div>
+    <div class="search-box">
+      <i class="fas fa-search"></i>
+      <input type="text" placeholder="Search vehicles..." oninput="filterVehicles(this.value)" inputmode="text">
+    </div>
     <div class="card-list" id="vehicles-list"></div>
   </div>
 
@@ -155,13 +165,6 @@
     </div>
     <div class="card-list">
       <div class="profile-card">
-        <h3>📊 Overview</h3>
-        <div class="profile-row"><span>Total Leads</span><span id="profile-leads">—</span></div>
-        <div class="profile-row"><span>Qualified</span><span id="profile-qualified">—</span></div>
-        <div class="profile-row clickable" onclick="openPipelineModal()"><span>Pipeline Value</span><span id="profile-value">—</span><i class="fas fa-pen" style="font-size:11px;color:var(--primary-light);margin-left:8px"></i></div>
-        <div class="profile-row"><span>Gateway</span><span id="profile-gateway">—</span></div>
-      </div>
-      <div class="profile-card">
         <h3>📨 Message Quota</h3>
         <div class="profile-row"><span>Used</span><span id="profile-quota">—</span></div>
         <div class="quota-bar"><div class="quota-fill" id="quota-fill" style="width:0%"></div></div>
@@ -174,12 +177,6 @@
         <button class="btn-action btn-confirm" id="invite-btn" onclick="openInviteModal()" style="width:100%">
           <i class="fas fa-user-plus" style="margin-right:6px"></i>Invite Member
         </button>
-      </div>
-      <div class="profile-card" id="gcal-card" style="display:none">
-        <h3><i class="fab fa-google" style="margin-right:8px;color:#4285F4"></i>Google Calendar</h3>
-        <div id="gcal-status">
-          <div class="loading-center"><div class="spinner"></div></div>
-        </div>
       </div>
       <!-- Google Calendar Integration Card -->
       <div class="profile-card" id="gcal-card" style="display:none">
@@ -225,16 +222,161 @@
     <div class="card-list" id="patients-list"></div>
   </div>
 
-  <div class="view" id="view-insights" style="background:#0B1120;color:#f8fafc;">
-    <div class="topbar" style="background:#0B1120;border-bottom:1px solid rgba(255,255,255,0.1)">
-      <button class="hamburger" onclick="openSidebar()"><i class="fas fa-bars" style="color:#fff"></i></button>
-      <div class="topbar-title">
-        <h2 style="color:#fff">Clinical Insights</h2>
-        <div class="topbar-sub" style="color:#94a3b8">Premium Practice Analytics</div>
-      </div>
+  <!-- PROPERTIES VIEW (Real Estate module) -->
+  <div class="view" id="view-properties" style="display:none">
+    <div class="topbar">
+      <h2>🏢 Properties</h2>
+      <div class="topbar-sub">Property catalog management</div>
     </div>
-    <div class="view-content" id="insights-content" style="padding:16px;">
-      <!-- Chart.js and KPIs will render here -->
+    <div style="padding:12px 16px 0;flex-shrink:0">
+      <button class="btn-action btn-confirm" id="add-property-btn" onclick="openAddProperty()" style="width:100%">
+        <i class="fas fa-plus" style="margin-right:6px"></i>Add New Property
+      </button>
+    </div>
+    <div class="search-box">
+      <i class="fas fa-search"></i>
+      <input type="text" placeholder="Search properties..." oninput="filterProperties(this.value)" inputmode="text">
+    </div>
+    <div class="card-list" id="properties-list"></div>
+  </div>
+
+  <!-- MANUFACTURER MODULE VIEWS -->
+  <!-- PRODUCTS VIEW (Primary) -->
+  <div class="view" id="view-mfr-products" style="display:none">
+    <div class="topbar">
+      <h2>📦 Products</h2>
+      <div class="topbar-sub">Product catalog — Ocean Aqua Water</div>
+    </div>
+    <div style="padding:12px 16px 0;flex-shrink:0">
+      <button class="btn-action btn-confirm" id="add-mfr-product-btn" onclick="openAddMfrProduct()" style="width:100%">
+        <i class="fas fa-plus" style="margin-right:6px"></i>Add New Product
+      </button>
+    </div>
+    <div class="search-box">
+      <i class="fas fa-search"></i>
+      <input type="text" placeholder="Search products..." oninput="filterMfrProducts(this.value)" inputmode="text">
+    </div>
+    <div class="card-list" id="mfr-products-list"></div>
+  </div>
+
+  <!-- ORDERS VIEW -->
+  <div class="view" id="view-mfr-orders" style="display:none">
+    <div class="topbar">
+      <h2>📋 Orders</h2>
+      <div class="topbar-sub">Order management</div>
+    </div>
+    <div class="mfr-filter-bar" id="mfr-order-filters">
+      <button class="mfr-filter-chip active" onclick="filterMfrOrders('all')">All</button>
+      <button class="mfr-filter-chip" onclick="filterMfrOrders('PENDING')">Pending</button>
+      <button class="mfr-filter-chip" onclick="filterMfrOrders('PROCESSING')">Processing</button>
+      <button class="mfr-filter-chip" onclick="filterMfrOrders('SHIPPED')">Shipped</button>
+      <button class="mfr-filter-chip" onclick="filterMfrOrders('DELIVERED')">Delivered</button>
+      <button class="mfr-filter-chip" onclick="filterMfrOrders('CANCELLED')">Cancelled</button>
+    </div>
+    <div class="card-list" id="mfr-orders-list"></div>
+  </div>
+
+  <!-- QUOTATIONS VIEW -->
+  <div class="view" id="view-mfr-quotes" style="display:none">
+    <div class="topbar">
+      <h2>💰 Quotations</h2>
+      <div class="topbar-sub">Quotation requests & pricing</div>
+    </div>
+    <div class="mfr-filter-bar" id="mfr-quote-filters">
+      <button class="mfr-filter-chip active" onclick="filterMfrQuotes('all')">All</button>
+      <button class="mfr-filter-chip" onclick="filterMfrQuotes('PENDING')">Pending</button>
+      <button class="mfr-filter-chip" onclick="filterMfrQuotes('SENT')">Sent</button>
+      <button class="mfr-filter-chip" onclick="filterMfrQuotes('ACCEPTED')">Accepted</button>
+      <button class="mfr-filter-chip" onclick="filterMfrQuotes('NEGOTIATING')">Negotiating</button>
+      <button class="mfr-filter-chip" onclick="filterMfrQuotes('REJECTED')">Rejected</button>
+    </div>
+    <div class="card-list" id="mfr-quotes-list"></div>
+  </div>
+
+  <!-- GATEWAY ADMIN VIEW (hidden from clients — owner/admin only) -->
+  <div class="view" id="view-gateway" style="display:none">
+    <div class="topbar">
+      <h2>🛰️ Gateway</h2>
+      <div class="topbar-sub">Device monitoring & enrollment</div>
+    </div>
+    <div class="card-list" id="gateway-body">
+      <!-- Enrollment Section -->
+      <div class="profile-card" id="gw-enroll-section">
+        <h3><i class="fas fa-satellite-dish" style="margin-right:8px;color:#8B5CF6"></i>Device Enrollment</h3>
+        <div id="gw-not-enrolled">
+          <div style="font-size:13px;color:var(--text-muted);margin-bottom:12px;line-height:1.5">
+            Enroll this device as a Cortexia Gateway to detect missed calls and deliver them to the CRM.
+          </div>
+          <input class="modal-input" id="gw-server-url" type="url" placeholder="Server URL (e.g. https://cortexia.shop)" style="margin-bottom:8px">
+          <input class="modal-input" id="gw-business-id" type="number" placeholder="Business ID" style="margin-bottom:8px">
+          <input class="modal-input" id="gw-secret" type="password" placeholder="Enrollment Secret" style="margin-bottom:8px">
+          <button class="btn-action btn-confirm" id="gw-enroll-btn" onclick="gwEnroll()" style="width:100%">
+            <i class="fas fa-link" style="margin-right:6px"></i>Enroll Device
+          </button>
+        </div>
+        <div id="gw-enrolled" style="display:none">
+          <div class="profile-row"><span>Status</span><span id="gw-enroll-status" class="role-badge role-admin">Enrolled</span></div>
+          <div class="profile-row"><span>Server</span><span id="gw-server" style="font-size:12px">—</span></div>
+          <div class="profile-row"><span>Business</span><span id="gw-bid">—</span></div>
+          <div class="profile-row"><span>Last Sync</span><span id="gw-last-sync">—</span></div>
+          <div class="profile-row"><span>Last Heartbeat</span><span id="gw-last-hb">—</span></div>
+          <div class="profile-row"><span>Offline Queue</span><span id="gw-queue">0</span></div>
+          <button class="btn-action" onclick="gwClearEnrollment()" style="width:100%;margin-top:10px;background:rgba(239,68,68,.12);color:#EF4444;border:1px solid rgba(239,68,68,.2)">
+            <i class="fas fa-unlink" style="margin-right:6px"></i>Clear Enrollment
+          </button>
+        </div>
+      </div>
+
+      <!-- Monitoring Controls -->
+      <div class="profile-card" id="gw-monitor-section">
+        <h3><i class="fas fa-shield-alt" style="margin-right:8px;color:var(--primary)"></i>Monitoring</h3>
+        <div class="profile-row"><span>Service</span><span id="gw-service-status">—</span></div>
+        <div class="profile-row"><span>Monitoring</span><span id="gw-monitoring">—</span></div>
+        <div class="profile-row"><span>Heartbeat</span><span id="gw-heartbeat">—</span></div>
+        <div class="profile-row"><span>Restarts</span><span id="gw-restarts">0</span></div>
+        <div class="profile-row"><span>Safe Mode</span><span id="gw-safe-mode">No</span></div>
+        <div style="display:flex;gap:8px;margin-top:12px">
+          <button class="btn-action btn-confirm" id="gw-start-btn" onclick="gwStartMonitoring()" style="flex:1">
+            <i class="fas fa-play" style="margin-right:4px"></i>Start
+          </button>
+          <button class="btn-action" id="gw-stop-btn" onclick="gwStopMonitoring()" style="flex:1;background:rgba(239,68,68,.12);color:#EF4444;border:1px solid rgba(239,68,68,.2)">
+            <i class="fas fa-stop" style="margin-right:4px"></i>Stop
+          </button>
+        </div>
+      </div>
+
+      <!-- Permissions -->
+      <div class="profile-card" id="gw-perms-section">
+        <h3><i class="fas fa-key" style="margin-right:8px;color:var(--warning)"></i>Permissions</h3>
+        <div class="profile-row"><span>Phone State</span><span id="gw-perm-phone">—</span></div>
+        <div class="profile-row"><span>Call Log</span><span id="gw-perm-calllog">—</span></div>
+        <div class="profile-row"><span>Contacts</span><span id="gw-perm-contacts">—</span></div>
+        <div class="profile-row"><span>Battery Optimized</span><span id="gw-perm-battery">—</span></div>
+        <div style="display:flex;gap:8px;margin-top:12px">
+          <button class="btn-action btn-confirm" onclick="gwRequestPermissions()" style="flex:1">
+            <i class="fas fa-shield-alt" style="margin-right:4px"></i>Grant Permissions
+          </button>
+          <button class="btn-action btn-pending" onclick="gwOpenBattery()" style="flex:1">
+            <i class="fas fa-battery-full" style="margin-right:4px"></i>Battery Settings
+          </button>
+        </div>
+      </div>
+
+      <!-- Device Health -->
+      <div class="profile-card" id="gw-health-section">
+        <h3><i class="fas fa-heartbeat" style="margin-right:8px;color:#EF4444"></i>Device Health</h3>
+        <div class="profile-row"><span>Battery</span><span id="gw-battery">—</span></div>
+        <div class="profile-row"><span>Uptime</span><span id="gw-uptime">—</span></div>
+        <div class="profile-row"><span>SIM Count</span><span id="gw-sims">—</span></div>
+        <div class="profile-row"><span>Missed Calls</span><span id="gw-missed-count">0</span></div>
+        <div class="profile-row"><span>Total Restarts</span><span id="gw-total-restarts">0</span></div>
+      </div>
+
+      <!-- OEM Onboarding -->
+      <div class="profile-card" id="gw-oem-section">
+        <h3><i class="fas fa-mobile-alt" style="margin-right:8px;color:#3B82F6"></i>OEM Setup</h3>
+        <div id="gw-oem-steps">Loading...</div>
+      </div>
     </div>
   </div>
 
@@ -251,8 +393,12 @@
       <span class="nav-badge" id="notif-badge" style="display:none">0</span>
     </button>
     <button class="nav-tab" id="tab-vehicles" onclick="switchTab('vehicles')" style="display:none"><i class="fas fa-bus"></i><span>Fleet</span></button>
+    <button class="nav-tab" id="tab-properties" onclick="switchTab('properties')" style="display:none"><i class="fas fa-building"></i><span>Properties</span></button>
     <button class="nav-tab" id="tab-patients" onclick="switchTab('patients')" style="display:none"><i class="fas fa-stethoscope"></i><span>Patients</span></button>
-    <button class="nav-tab" id="tab-insights" onclick="switchTab('insights')" style="display:none"><i class="fas fa-chart-pie"></i><span>Insights</span></button>
+    <button class="nav-tab" id="tab-mfr-products" onclick="switchTab('mfr-products')" style="display:none"><i class="fas fa-boxes"></i><span>Products</span></button>
+    <button class="nav-tab" id="tab-mfr-orders" onclick="switchTab('mfr-orders')" style="display:none"><i class="fas fa-truck"></i><span>Orders</span></button>
+    <button class="nav-tab" id="tab-mfr-quotes" onclick="switchTab('mfr-quotes')" style="display:none"><i class="fas fa-file-invoice-dollar"></i><span>Quotes</span></button>
+    <button class="nav-tab" id="tab-gateway" onclick="switchTab('gateway')" style="display:none"><i class="fas fa-satellite-dish"></i><span>Gateway</span></button>
     <button class="nav-tab" id="tab-profile" onclick="switchTab('profile')"><i class="fas fa-user"></i><span>Profile</span></button>
   </nav>
 </div>
@@ -394,26 +540,6 @@
   </div>
 </div>
 
-<!-- VEHICLE EDIT MODAL -->
-<div class="modal-overlay" id="vehicle-edit-modal" style="display:none" onclick="if(event.target===this)closeVehicleEdit()">
-  <div class="modal-card" style="max-height:85vh;overflow-y:auto">
-    <h3 style="margin-bottom:14px"><i class="fas fa-edit" style="margin-right:8px;color:var(--primary-light)"></i>Edit Vehicle</h3>
-    <label class="modal-label">Vehicle Name</label>
-    <input class="modal-input" id="ve-name" placeholder="e.g. Non AC 17 Seater">
-    <label class="modal-label">Price per KM (₹)</label>
-    <input class="modal-input" id="ve-rate" type="number" placeholder="23">
-    <label class="modal-label">Seat Count</label>
-    <input class="modal-input" id="ve-seats" type="number" placeholder="17">
-    <label class="modal-label">Features (comma separated)</label>
-    <textarea class="modal-input" id="ve-features" rows="4" placeholder="Pushback seats, WiFi, Dolby..."></textarea>
-    <label class="modal-label">Notes (comma separated)</label>
-    <textarea class="modal-input" id="ve-notes" rows="2" placeholder="Toll extra, Parking extra..."></textarea>
-    <div style="display:flex;gap:10px;margin-top:16px">
-      <button class="vd-btn-primary" id="ve-save-btn" onclick="saveVehicleEdit()" style="flex:1"><i class="fas fa-save" style="margin-right:6px"></i>Save</button>
-      <button class="vd-btn-secondary" onclick="closeVehicleEdit()" style="flex:1">Cancel</button>
-    </div>
-  </div>
-</div>
 
 <!-- FULL-SCREEN CHAT -->
 <div class="chat-screen" id="chat-screen" style="display:none">
@@ -495,6 +621,195 @@
   </div>
 </div>
 
-<script src="/mobile.js?v=16"></script>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- PROPERTY DETAIL PAGE                                        -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="page-screen" id="page-property-detail" style="display:none">
+  <div class="page-header">
+    <button class="chat-back" onclick="closePropertyDetail()"><i class="fas fa-arrow-left"></i></button>
+    <h3 id="pd-title">Property</h3>
+    <button class="btn-action btn-note" onclick="openPropertyEdit(currentPropertyId)" style="padding:6px 12px;font-size:12px">
+      <i class="fas fa-edit"></i> Edit
+    </button>
+  </div>
+  <div class="page-body" id="pd-body">
+    <div class="loading-center"><div class="spinner"></div><span>Loading property...</span></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- SITE VISITS PAGE                                            -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="page-screen" id="page-site-visits" style="display:none">
+  <div class="page-header">
+    <button class="chat-back" onclick="closePage('site-visits')"><i class="fas fa-arrow-left"></i></button>
+    <h3>🗓️ Site Visits</h3>
+  </div>
+  <div class="page-body" id="site-visits-body">
+    <div class="loading-center"><div class="spinner"></div></div>
+  </div>
+</div>
+
+
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- ADD / EDIT VEHICLE MODAL                                    -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="vehicle-form-modal" style="display:none" onclick="if(event.target===this)closeVehicleForm()">
+  <div class="modal-card" onclick="event.stopPropagation()" style="max-height:90vh;overflow-y:auto">
+    <h3 style="margin-bottom:4px"><i class="fas fa-bus" style="margin-right:8px;color:var(--primary-light)"></i><span id="vf-modal-title">Add Vehicle</span></h3>
+    <p style="margin-bottom:14px;color:var(--text-muted);font-size:13px">Fill in the vehicle details below</p>
+
+    <input class="modal-input" id="vf-name" type="text" placeholder="Vehicle Name * (e.g. Non AC 17 Seater)">
+
+    <div style="display:flex;gap:8px">
+      <input class="modal-input" id="vf-seats" type="number" placeholder="Seat Count" style="flex:1">
+      <input class="modal-input" id="vf-rate" type="number" placeholder="Price per KM (₹)" style="flex:1">
+      <select class="modal-input" id="vf-type" style="flex:1">
+        <option value="general">General</option>
+        <option value="outstation">Outstation</option>
+        <option value="local">Local</option>
+      </select>
+    </div>
+
+    <textarea class="modal-input" id="vf-features" rows="2" placeholder="Features (comma-separated: Pushback seats, WiFi...)"></textarea>
+    <textarea class="modal-input" id="vf-notes" rows="2" placeholder="Notes (comma-separated: Toll extra, Parking extra...)"></textarea>
+    <textarea class="modal-input" id="vf-showcase" rows="3" placeholder="Showcase Text (WhatsApp format)"></textarea>
+
+    <!-- Media Upload Section -->
+    <div style="margin-top:14px;padding:12px;background:rgba(255,255,255,0.04);border-radius:12px;border:1px solid var(--border)">
+      <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:10px"><i class="fas fa-images" style="margin-right:6px;color:var(--primary-light)"></i>Vehicle Media</div>
+      <div style="display:flex;gap:8px;margin-bottom:8px">
+        <label class="btn-action btn-note" style="flex:1;text-align:center;cursor:pointer;padding:8px">
+          <i class="fas fa-image" style="margin-right:4px"></i>Add Images
+          <input type="file" id="vf-image-input" accept="image/*" multiple style="display:none" onchange="handleVehicleMediaSelect(event,'image')">
+        </label>
+        <label class="btn-action btn-pending" style="flex:1;text-align:center;cursor:pointer;padding:8px">
+          <i class="fas fa-video" style="margin-right:4px"></i>Add Videos
+          <input type="file" id="vf-video-input" accept="video/*" multiple style="display:none" onchange="handleVehicleMediaSelect(event,'video')">
+        </label>
+      </div>
+      <div id="vf-media-preview" style="display:flex;flex-wrap:wrap;gap:8px"></div>
+      <div id="vf-existing-media" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:6px"></div>
+    </div>
+
+    <div style="display:flex;gap:10px;margin-top:16px">
+      <button class="modal-btn cancel" onclick="closeVehicleForm()">Cancel</button>
+      <button class="modal-btn save" id="vf-save-btn" onclick="saveVehicleForm()">Save Vehicle</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- ADD / EDIT PROPERTY MODAL                                   -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="property-form-modal" style="display:none" onclick="if(event.target===this)closePropertyForm()">
+  <div class="modal-card" onclick="event.stopPropagation()" style="max-height:90vh;overflow-y:auto">
+    <h3 style="margin-bottom:4px"><i class="fas fa-building" style="margin-right:8px;color:var(--primary-light)"></i><span id="pf-modal-title">Add Property</span></h3>
+    <p style="margin-bottom:14px;color:var(--text-muted);font-size:13px">Fill in the property details below</p>
+
+    <input class="modal-input" id="pf-title" type="text" placeholder="Property Title *" style="margin-bottom:10px">
+
+    <select class="modal-input" id="pf-listing-type" style="margin-bottom:10px">
+      <option value="sale">For Sale</option>
+      <option value="rent">For Rent</option>
+    </select>
+
+    <select class="modal-input" id="pf-property-type" style="margin-bottom:10px">
+      <option value="">Type</option>
+      <option>Apartment</option>
+      <option>Villa/House</option>
+      <option>Plot/Land</option>
+      <option>Commercial</option>
+      <option>Shop</option>
+      <option>Office</option>
+    </select>
+
+    <input class="modal-input" id="pf-city" type="text" placeholder="City" style="margin-bottom:10px">
+
+    <input class="modal-input" id="pf-location" type="text" placeholder="Area / Locality" style="margin-bottom:10px">
+
+    <input class="modal-input" id="pf-price-amount" type="number" placeholder="Price (₹)" style="margin-bottom:10px">
+
+    <input class="modal-input" id="pf-price-label" type="text" placeholder="Price Label (e.g. ₹45L)" style="margin-bottom:10px">
+
+    <select class="modal-input" id="pf-bedrooms" style="margin-bottom:10px">
+      <option value="">Bedrooms</option>
+      <option>1 BHK</option>
+      <option>2 BHK</option>
+      <option>3 BHK</option>
+      <option>4 BHK</option>
+      <option>5+ BHK</option>
+      <option>Studio</option>
+      <option>N/A</option>
+    </select>
+
+    <input class="modal-input" id="pf-bathrooms" type="text" placeholder="Bathrooms" style="margin-bottom:10px">
+
+    <input class="modal-input" id="pf-area" type="number" placeholder="Area (sqft)" style="margin-bottom:10px">
+
+    <select class="modal-input" id="pf-furnishing" style="margin-bottom:10px">
+      <option value="">Furnishing</option>
+      <option>Furnished</option>
+      <option>Semi-Furnished</option>
+      <option>Unfurnished</option>
+    </select>
+
+    <select class="modal-input" id="pf-possession" style="margin-bottom:10px">
+      <option value="">Possession</option>
+      <option>Ready to Move</option>
+      <option>0-6 Months</option>
+      <option>6-12 Months</option>
+      <option>New Launch</option>
+    </select>
+
+    <textarea class="modal-input" id="pf-description" rows="3" placeholder="Description (highlights, RERA, landmarks...)" style="margin-bottom:10px"></textarea>
+    <input class="modal-input" id="pf-amenities" type="text" placeholder="Amenities (comma-separated: Gym, Pool, Parking...)" style="margin-bottom:10px">
+    <input class="modal-input" id="pf-rera" type="text" placeholder="RERA ID (optional)" style="margin-bottom:10px">
+
+    <!-- Media Upload Section -->
+    <div style="margin-top:14px;padding:12px;background:rgba(255,255,255,0.04);border-radius:12px;border:1px solid var(--border)">
+      <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:10px"><i class="fas fa-images" style="margin-right:6px;color:var(--primary-light)"></i>Property Media</div>
+      <div style="display:flex;gap:8px;margin-bottom:8px">
+        <label class="btn-action btn-note" style="flex:1;text-align:center;cursor:pointer;padding:8px">
+          <i class="fas fa-image" style="margin-right:4px"></i>Add Images
+          <input type="file" id="pf-image-input" accept="image/*" multiple style="display:none" onchange="handlePropertyMediaSelect(event,'image')">
+        </label>
+        <label class="btn-action btn-pending" style="flex:1;text-align:center;cursor:pointer;padding:8px">
+          <i class="fas fa-video" style="margin-right:4px"></i>Add Videos
+          <input type="file" id="pf-video-input" accept="video/*" multiple style="display:none" onchange="handlePropertyMediaSelect(event,'video')">
+        </label>
+      </div>
+      <div id="pf-media-preview" style="display:flex;flex-wrap:wrap;gap:8px"></div>
+      <div id="pf-existing-media" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:6px"></div>
+    </div>
+
+    <div style="display:flex;gap:10px;margin-top:16px">
+      <button class="modal-btn cancel" onclick="closePropertyForm()">Cancel</button>
+      <button class="modal-btn save" id="pf-save-btn" onclick="savePropertyForm()">Save Property</button>
+    </div>
+  </div>
+</div>
+
+<!-- DEVICE PAIRING CODE OVERLAY -->
+<div id="pairing-code-overlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:9999;background:rgba(15,23,42,.95);backdrop-filter:blur(20px);flex-direction:column;align-items:center;justify-content:center;padding:24px">
+  <div style="text-align:center;max-width:360px">
+    <div style="font-size:48px;margin-bottom:16px">📱</div>
+    <h2 style="color:#fff;font-size:20px;font-weight:700;margin:0 0 8px">Device Registered</h2>
+    <p style="color:#94a3b8;font-size:14px;line-height:1.6;margin:0 0 24px">Share this code with your Cortexia admin to activate your device.</p>
+    <div style="background:linear-gradient(135deg,rgba(79,70,229,.15),rgba(139,92,246,.15));border:2px solid rgba(139,92,246,.3);border-radius:16px;padding:20px 32px;margin:0 0 24px">
+      <div id="pairing-code-display" style="font-family:'Outfit',monospace;font-size:36px;font-weight:700;letter-spacing:8px;color:#fff;text-align:center">— — — — — —</div>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:center;gap:8px;color:#64748b;font-size:13px">
+      <div class="spinner" style="width:16px;height:16px;border-width:2px"></div>
+      <span>Waiting for admin approval...</span>
+    </div>
+    <p style="color:#475569;font-size:12px;margin-top:20px">Code expires in 24 hours. Auto-checking every 30 seconds.</p>
+  </div>
+</div>
+
+<script src="/mobile.js?v=23"></script>
 </body>
 </html>
+
